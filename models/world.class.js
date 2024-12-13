@@ -7,8 +7,18 @@ class World {
 
   // Background wird hinzugefügt
   backgroundObjects = [
+    new BackgroundObject("./assets/img/5_background/layers/air.png", 0),
     new BackgroundObject(
-      "./assets/img/5_background/layers/1_first_layer/1.png"
+      "./assets/img/5_background/layers/3_third_layer/1.png",
+      0
+    ),
+    new BackgroundObject(
+      "./assets/img/5_background/layers/2_second_layer/1.png",
+      0
+    ),
+    new BackgroundObject(
+      "./assets/img/5_background/layers/1_first_layer/1.png",
+      0
     ),
   ];
 
@@ -22,18 +32,13 @@ class World {
     this.draw();
   }
 
-  // hier wird der charakter  angezeigt
   draw() {
     // hier wird  bewegung wieder gecleart
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    // hier wird der charakter  angezeigt
+    this.addObjectsToMap(this.backgroundObjects);
+    this.addObjectsToMap(this.clouds);
     this.addToMap(this.character);
-    // hier wird die Clloud  angezeigt
-    addObjectsToMap(this.clouds);
-    // hier wird der Gegner  angezeigt
-    addObjectsToMap(this.enemies);
-    // hier wird der Hintergrund angezeigt
-    addObjectsToMap(this.backgroundObjects);
+    this.addObjectsToMap(this.enemies);
 
     //=======================================================================
 
