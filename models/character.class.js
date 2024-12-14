@@ -10,8 +10,6 @@ class Character extends MovableObject {
     "./assets/img/2_character_pepe/1_idle/idle/I-9.png",
   ];
 
-  currentImage = 0;
-
   constructor() {
     super().loadImage("./assets/img/2_character_pepe/1_idle/idle/I-1.png");
     this.loadImages(this.IMAGES_STAND);
@@ -19,12 +17,15 @@ class Character extends MovableObject {
     this.animate();
   }
 
+  // Animation Charakter
+  // ( Info ) % heist Modulu
   animate() {
     setInterval(() => {
-      let path = this.IMAGES_STAND[this.currentImage];
+      let i = this.currentImage % this.IMAGES_STAND.length; // index soll heißen: ergeht durch die json und fängt nach dem ende wieder bei 1 an.
+      let path = this.IMAGES_STAND[i];
       this.img = this.imageCache[path];
       this.currentImage++;
-    }, 1000);
+    }, 400);
   }
 
   jump() {}
