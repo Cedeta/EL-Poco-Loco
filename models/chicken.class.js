@@ -15,17 +15,18 @@ class Chicken extends MovableObject {
     );
     this.loadImages(this.IMAGES_WALKING);
 
-    this.x = 200 + Math.random() * 500;
+    this.x = 950 + Math.random() * 2500;
+    this.speed = 0.25 + Math.random() * 0.65;
+
     this.animate();
   }
 
   // Animation Chicken
   animate() {
+    this.moveLeft();
+
     setInterval(() => {
-      let i = this.currentImage % this.IMAGES_WALKING.length; // index soll heißen: ergeht durch die json und fängt nach dem ende wieder bei 1 an.
-      let path = this.IMAGES_WALKING[i];
-      this.img = this.imageCache[path];
-      this.currentImage++;
+      this.playAnimation(this.IMAGES_WALKING);
     }, 280);
   }
 }

@@ -1,5 +1,8 @@
 class Character extends MovableObject {
-  IMAGES_STAND = [
+  speed = 5;
+  x = 0;
+
+  IMAGES_STANDING = [
     "./assets/img/2_character_pepe/1_idle/idle/I-2.png",
     "./assets/img/2_character_pepe/1_idle/idle/I-3.png",
     "./assets/img/2_character_pepe/1_idle/idle/I-4.png",
@@ -10,22 +13,54 @@ class Character extends MovableObject {
     "./assets/img/2_character_pepe/1_idle/idle/I-9.png",
   ];
 
-  constructor() {
-    super().loadImage("./assets/img/2_character_pepe/1_idle/idle/I-1.png");
-    this.loadImages(this.IMAGES_STAND);
+  IMAGES_WALKING = [
+    "./assets/img/2_character_pepe/2_walk/W-21.png",
+    "./assets/img/2_character_pepe/2_walk/W-22.png",
+    "./assets/img/2_character_pepe/2_walk/W-23.png",
+    "./assets/img/2_character_pepe/2_walk/W-24.png",
+    "./assets/img/2_character_pepe/2_walk/W-25.png",
+    "./assets/img/2_character_pepe/2_walk/W-26.png",
+  ];
 
+  world;
+
+  // Sound hinzufügen (laufen)
+  walking_sound = new Audio("./audio/footstep.wav");
+
+  constructor() {
+    super().loadImage("./assets/img/2_character_pepe/2_walk/W-21.png");
+    this.loadImages(this.IMAGES_WALKING);
+    // this.leadImages(this.IMAGES_WALK);
     this.animate();
   }
 
-  // Animation Charakter
+  // Animation Charakter (/ laufen)
   // ( Info ) % heist Modulu
   animate() {
     setInterval(() => {
-      let i = this.currentImage % this.IMAGES_STAND.length; // index soll heißen: ergeht durch die json und fängt nach dem ende wieder bei 1 an.
-      let path = this.IMAGES_STAND[i];
-      this.img = this.imageCache[path];
-      this.currentImage++;
-    }, 400);
+      // nach rechts laufen
+      this.walking_sound.pause();
+      if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
+        this.x += this.speed;
+        this.otherDirection = false;
+        this.walking_sound.play();
+      }
+      // nach links laufen
+      if (this.world.keyboard.LEFT && this.x > 0) {
+        this.x -= this.speed;
+        this.otherDirection = true;
+        this.walking_sound.play();
+      }
+      this.world.camera_x = -this.x + 60;
+    }, 1000 / 60);
+
+    setInterval(() => {
+      // Nach Rechts laufen
+      if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+        // Walk animation
+        this.playAnimation(this.IMAGES_WALKING);
+      }
+    }, 100);
   }
 
   jump() {}

@@ -6,6 +6,8 @@ class MovableObject {
   img;
   imageCache = {};
   currentImage = 0;
+  speed = 0.15;
+  otherDirection = false;
 
   loadImage(path) {
     this.img = new Image();
@@ -24,5 +26,17 @@ class MovableObject {
     console.log("moving right");
   }
 
-  moveLeft() {}
+  // Nach Links bewegen ( enemys )
+  moveLeft() {
+    setInterval(() => {
+      this.x -= this.speed;
+    }, 1000 / 60);
+  }
+
+  playAnimation(images) {
+    let i = this.currentImage % this.IMAGES_WALKING.length; // index soll heißen: ergeht durch die json und fängt nach dem ende wieder bei 1 an.
+    let path = images[i];
+    this.img = this.imageCache[path];
+    this.currentImage++;
+  }
 }
