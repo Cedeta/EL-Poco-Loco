@@ -59,14 +59,6 @@ class MovableObject extends DrawableObject {
     return this.energy == 0;
   }
 
-  loadImages(arr) {
-    arr.forEach((path) => {
-      let img = new Image();
-      img.src = path;
-      this.imageCache[path] = img;
-    });
-  }
-
   moveRight() {
     this.x += this.speed;
   }
