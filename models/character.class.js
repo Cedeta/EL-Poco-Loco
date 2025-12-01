@@ -4,6 +4,8 @@ class Character extends MovableObject {
   // y = 193;
   y = 198;
   long_standing = 0;
+  deadAnimationCounter = 0;
+  deadAnimationFinished = false;
 
   IMAGES_STANDING = [
     "./assets/img/2_character_pepe/1_idle/idle/I-2.png",
@@ -51,13 +53,13 @@ class Character extends MovableObject {
   ];
 
   IMAGES_DEAD = [
-    "assets/img/2_character_pepe/5_dead/D-51.png",
-    "assets/img/2_character_pepe/5_dead/D-52.png",
-    "assets/img/2_character_pepe/5_dead/D-53.png",
-    "assets/img/2_character_pepe/5_dead/D-54.png",
-    "assets/img/2_character_pepe/5_dead/D-55.png",
-    "assets/img/2_character_pepe/5_dead/D-56.png",
-    "assets/img/2_character_pepe/5_dead/D-57.png",
+    "./assets/img/2_character_pepe/5_dead/D-51.png",
+    "./assets/img/2_character_pepe/5_dead/D-52.png",
+    "./assets/img/2_character_pepe/5_dead/D-53.png",
+    "./assets/img/2_character_pepe/5_dead/D-54.png",
+    "./assets/img/2_character_pepe/5_dead/D-55.png",
+    "./assets/img/2_character_pepe/5_dead/D-56.png",
+    "./assets/img/2_character_pepe/5_dead/D-57.png",
   ];
 
   IMAGES_HURT = [
@@ -89,6 +91,9 @@ class Character extends MovableObject {
   // ( Info ) % heist Modulu
   animate() {
     setInterval(() => {
+      // Bewegung nur erlauben, wenn nicht Tod ist
+      if (!this.isDead()) {
+      
       // nach rechts laufen
       if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
         this.moveRight();
@@ -110,13 +115,30 @@ class Character extends MovableObject {
         this.jump_sound.play();
         this.long_standing = 0;
       }
-
+    }
       this.world.camera_x = -this.x + 60;
     }, 1000 / 60);
+    
 
     setInterval(() => {
       if (this.isDead()) {
-        this.playAnimation(this.IMAGES_DEAD);
+        if (!this.deadAnimationFinished) {
+          // Todes-Animation abspielen mit eigenem Counter
+          if (this.deadAnimationCounter < this.IMAGES_DEAD.length) {
+            let path = this.IMAGES_DEAD[this.deadAnimationCounter];
+            this.img = this.imageCache[path];
+            this.deadAnimationCounter++;
+          } else {
+            // Animation fertig - am letzten Bild bleiben
+            this.deadAnimationFinished = true;
+            let lastImage = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
+            this.img = this.imageCache[lastImage];
+          }
+        } else {
+          // Am letzten Bild bleiben
+          let lastImage = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
+          this.img = this.imageCache[lastImage];
+        }
       } else if (this.isHurt()) {
         this.playAnimation(this.IMAGES_HURT);
       } else if (this.isAboveGround()) {
@@ -126,7 +148,7 @@ class Character extends MovableObject {
           this.playAnimation(this.IMAGES_WALKING);
         }
       }
-    }, 100);
+    }, 200);
 
     // Langsamere Animation für Stand-Animation
     setInterval(() => {
