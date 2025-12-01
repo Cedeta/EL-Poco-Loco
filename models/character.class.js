@@ -65,7 +65,7 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_JUMPING);
     this.loadImages(this.IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
-    // this.loadImages(this.IMAGES_STANDING);
+    this.loadImages(this.IMAGES_STANDING);
     this.applyGravity();
     this.animate();
   }
@@ -109,7 +109,19 @@ class Character extends MovableObject {
         }
       }
     }, 100);
+
+    // Langsamere Animation für Stand-Animation
+  setInterval(() => {
+    if (!this.isDead() && !this.isHurt() && !this.isAboveGround()) {
+      if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {
+        this.playAnimation(this.IMAGES_STANDING);
+      }
+    }
+  }, 200);
+    
   }
+
+  
 
   jump() {
     this.speedY = 25;
