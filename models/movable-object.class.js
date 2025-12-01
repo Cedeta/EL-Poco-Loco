@@ -66,10 +66,6 @@ class MovableObject extends DrawableObject {
   // Nach Links bewegen ( enemys )
   moveLeft() {
     this.x -= this.speed;
-<<<<<<< HEAD
-=======
-    setInterval(() => {}, 1000 / 60);
->>>>>>> 55217d74a7747cd726c046d2184f32af4a734180
   }
 
   jump() {
