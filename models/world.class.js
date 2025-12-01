@@ -6,14 +6,14 @@ class World {
   ctx;
   keyboard;
   camera_x = 0;
+  statusBar = new StatusBarHealth(20, 0);
 
-  // wird in 2d angezeigt
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
     this.keyboard = keyboard;
-    this.draw();
     this.setWorld();
+    this.draw();
     this.checkCollisions();
   }
 
@@ -21,6 +21,7 @@ class World {
     this.character.world = this;
   }
 
+  // prüft ob der character mit enemies kollidiert
   checkCollisions() {
     setInterval(() => {
       this.level.enemies.forEach((enemy) => {
@@ -33,33 +34,34 @@ class World {
   }
 
   draw() {
-    // hier wird  bewegung wieder gecleart
+    // canvas leeren damit alles neu gezeichnet werden kann
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.ctx.translate(this.camera_x, 0); // kamera ansicht bild mitlauf
+    // kamera verschieben damit der hintergrund mitläuft
+    this.ctx.translate(this.camera_x, 0);
 
     this.addObjectsToMap(this.level.backgroundObjects);
-
     this.addObjectsToMap(this.level.clouds);
+
+    // kamera wieder zurücksetzen
+    this.ctx.translate(-this.camera_x, 0);
+
+    // statusbar zeichnen (muss zwischen den translate aufrufen sein sonst bewegt sie sich mit)
+    if (this.statusBar) {
+      this.statusBar.setPercentage(this.character.energy);
+      this.addToMap(this.statusBar);
+    }
+
+    // kamera nochmal verschieben für character und enemies
+    this.ctx.translate(this.camera_x, 0);
+
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.enemies);
 
-    this.ctx.translate(-this.camera_x, 0); // kamera ansicht zurück
+    // kamera wieder zurück
+    this.ctx.translate(-this.camera_x, 0);
 
-    //=======================================================================
-
-    // // so wirds eigendlich geschrieben, besser ohne kommentare
-
-    // draw() {
-    //   this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    //   this.addToMap(this.character);
-    //   addObjectsToMap(this.clouds);
-    //   addObjectsToMap(this.enemies);
-    //   addObjectsToMap(this.backgroundObjects);
-
-    //=========================================================
-
-    // Draw() wird immer wieder aufgerufen
+    // draw immer wieder aufrufen damit es animiert wird
     let self = this;
     requestAnimationFrame(function () {
       self.draw();
@@ -72,14 +74,20 @@ class World {
     });
   }
 
-  // function für alle inhalte die man aanzeigen möchte
+  // fügt ein objekt zur map hinzu und zeichnet es
   addToMap(mo) {
+    // wenn das objekt nach links schaut dann spiegel es
     if (mo.otherDirection) {
       this.flipImage(mo);
     }
     mo.draw(this.ctx);
-    mo.drawFrame(this.ctx);
+    
+    // wenn drawFrame existiert dann zeichne den rahmen (für debug)
+    if (mo.drawFrame) {
+      mo.drawFrame(this.ctx);
+    }
 
+    // spiegelung wieder rückgängig machen
     if (mo.otherDirection) {
       this.flipImageBack(mo);
     }
