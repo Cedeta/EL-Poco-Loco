@@ -3,6 +3,7 @@ class Character extends MovableObject {
   x = 0;
   // y = 193;
   y = 198;
+  long_standing = 0;
 
   IMAGES_STANDING = [
     "./assets/img/2_character_pepe/1_idle/idle/I-2.png",
@@ -13,6 +14,19 @@ class Character extends MovableObject {
     "./assets/img/2_character_pepe/1_idle/idle/I-7.png",
     "./assets/img/2_character_pepe/1_idle/idle/I-8.png",
     "./assets/img/2_character_pepe/1_idle/idle/I-9.png",
+  ];
+
+  IMAGES_LONG_STANDING = [
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-11.png",
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-12.png",
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-13.png",
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-14.png",
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-15.png",
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-16.png",
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-17.png",
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-18.png",
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-19.png",
+    "./assets/img/2_character_pepe/1_idle/long_idle/I-20.png",
   ];
 
   IMAGES_WALKING = [
@@ -66,6 +80,7 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_STANDING);
+    this.loadImages(this.IMAGES_LONG_STANDING);
     this.applyGravity();
     this.animate();
   }
@@ -79,18 +94,21 @@ class Character extends MovableObject {
         this.moveRight();
         this.otherDirection = false;
         this.walking_sound.play();
+        this.long_standing = 0;
       }
       // nach links laufen
       if (this.world.keyboard.LEFT && this.x > 0) {
         this.moveLeft();
         this.otherDirection = true;
         this.walking_sound.play();
+        this.long_standing = 0;
       }
       // Nach oben Springen
       this.jump_sound.pause();
       if (this.world.keyboard.UP && !this.isAboveGround()) {
         this.jump();
         this.jump_sound.play();
+        this.long_standing = 0;
       }
 
       this.world.camera_x = -this.x + 60;
@@ -111,13 +129,24 @@ class Character extends MovableObject {
     }, 100);
 
     // Langsamere Animation für Stand-Animation
-  setInterval(() => {
-    if (!this.isDead() && !this.isHurt() && !this.isAboveGround()) {
-      if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {
-        this.playAnimation(this.IMAGES_STANDING);
+    setInterval(() => {
+      if (!this.isDead() && !this.isHurt() && !this.isAboveGround()) {
+        if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {
+          this.long_standing += 200; // NEU: Timer erhöhen (200ms pro Intervall)
+          
+          // Nach 3 Sekunden (3000ms) zur long_idle Animation wechseln
+          if (this.long_standing >= 3000) {
+            this.playAnimation(this.IMAGES_LONG_STANDING);
+          } else {
+            this.playAnimation(this.IMAGES_STANDING);
+          }
+        } else {
+          this.long_standing = 0; // NEU: Timer zurücksetzen wenn sich bewegt
+        }
+      } else {
+        this.long_standing = 0; // NEU: Timer zurücksetzen bei anderen Zuständen
       }
-    }
-  }, 200);
+    }, 200);
     
   }
 
