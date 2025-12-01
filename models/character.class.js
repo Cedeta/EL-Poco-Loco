@@ -134,11 +134,8 @@ class Character extends MovableObject {
             let lastImage = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
             this.img = this.imageCache[lastImage];
           }
-        } else {
-          // Am letzten Bild bleiben
-          let lastImage = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
-          this.img = this.imageCache[lastImage];
         }
+        // Wenn deadAnimationFinished = true, bleibt das Bild auf dem letzten Frame
       } else if (this.isHurt()) {
         this.playAnimation(this.IMAGES_HURT);
       } else if (this.isAboveGround()) {
@@ -154,7 +151,7 @@ class Character extends MovableObject {
     setInterval(() => {
       if (!this.isDead() && !this.isHurt() && !this.isAboveGround()) {
         if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {
-          this.long_standing += 200; // NEU: Timer erhöhen (200ms pro Intervall)
+          this.long_standing += 200;
           
           // Nach 3 Sekunden (3000ms) zur long_idle Animation wechseln
           if (this.long_standing >= 3000) {
@@ -163,10 +160,10 @@ class Character extends MovableObject {
             this.playAnimation(this.IMAGES_STANDING);
           }
         } else {
-          this.long_standing = 0; // NEU: Timer zurücksetzen wenn sich bewegt
+          this.long_standing = 0;
         }
       } else {
-        this.long_standing = 0; // NEU: Timer zurücksetzen bei anderen Zuständen
+        this.long_standing = 0;
       }
     }, 200);
     
