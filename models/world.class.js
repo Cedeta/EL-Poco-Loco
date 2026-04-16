@@ -7,6 +7,15 @@ class World {
   keyboard;
   camera_x = 0;
   statusBar = new StatusBarHealth(20, 0);
+  statusBarCoin = new StatusBarCoin(20, 45);
+  statusBarBottle = new StatusBarBottle(20, 90);
+
+collectedCoins = 0;
+collectedBottles = 0;
+
+maxCoins = 15;
+maxBottles = 8;
+
   gameOver = false;
   bossMusicStarted = false;
   bossMusic = new Audio("./audio/final-boss-musik.wav");
@@ -34,12 +43,16 @@ class World {
           console.log("collision with Character", this.character.energy);
         }
       });
+      const coinsBefore = this.level.coins.length;
       this.level.coins = this.level.coins.filter(
         (coin) => !this.character.isColliding(coin)
       );
+      this.collectedCoins += (coinsBefore - this.level.coins.length);
+      const bottlesBefore = this.level.bottles.length;
       this.level.bottles = this.level.bottles.filter(
         (bottle) => !this.character.isColliding(bottle)
       );
+      this.collectedBottles += (bottlesBefore - this.level.bottles.length);
     }, 200);
   }
 
@@ -60,6 +73,14 @@ class World {
     if (this.statusBar) {
       this.statusBar.setPercentage(this.character.energy);
       this.addToMap(this.statusBar);
+    }
+    if (this.statusBarCoin) {
+      this.statusBarCoin.setPercentage((this.collectedCoins / this.maxCoins) * 100);
+      this.addToMap(this.statusBarCoin);
+    }
+    if (this.statusBarBottle) {
+      this.statusBarBottle.setPercentage((this.collectedBottles / this.maxBottles) * 100);
+      this.addToMap(this.statusBarBottle);
     }
 
     // kamera nochmal verschieben für character und enemies
