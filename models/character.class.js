@@ -6,6 +6,8 @@ class Character extends MovableObject {
   long_standing = 0;
   deadAnimationCounter = 0;
   deadAnimationFinished = false;
+  isSnoring = false;
+  die_sound_played = false;
 
   IMAGES_STANDING = [
     "./assets/img/2_character_pepe/1_idle/idle/I-2.png",
@@ -70,12 +72,12 @@ class Character extends MovableObject {
 
   world;
 
-  // Sound 
-
-  //(laufen)
+  // Sounds
   walking_sound = new Audio("./audio/footstep.wav");
   jump_sound = new Audio("./audio/jump.wav");
-  // idle_sound = new Audio("./audio/snoring.wav");
+  // idle_sound = new Audio("./audio/snoring.wav"); // snoring sound benötigt eine User Interaction um zu starten, wird eingebaut sobald der playbutton eingebaut wird
+  hit_sound = new Audio("./audio/hit.wav");
+  die_sound = new Audio("./audio/die.mp3");
 
   constructor() {
     super().loadImage("./assets/img/2_character_pepe/2_walk/W-21.png");
@@ -124,6 +126,11 @@ class Character extends MovableObject {
 
     setInterval(() => {
       if (this.isDead()) {
+        if (!this.die_sound_played) {
+          this.die_sound.currentTime = 0;
+          this.die_sound.play();
+          this.die_sound_played = true;
+        }
         if (!this.deadAnimationFinished) {
           // Todes-Animation abspielen mit eigenem Counter
           if (this.deadAnimationCounter < this.IMAGES_DEAD.length) {
@@ -157,6 +164,11 @@ class Character extends MovableObject {
           
           // Nach 3 Sekunden (3000ms) zur long_idle Animation wechseln
           if (this.long_standing >= 3000) {
+            // if (!this.isSnoring) {
+            //   this.idle_sound.currentTime = 0;
+            //   this.idle_sound.play();
+            //   this.isSnoring = true;
+            // }
             this.playAnimation(this.IMAGES_LONG_STANDING);
           } else {
             this.playAnimation(this.IMAGES_STANDING);
@@ -171,7 +183,29 @@ class Character extends MovableObject {
     
   }
 
-  
+  // hit() {
+  //   if (this.isDead()) return;   // kein Sound/kein Schaden mehr nach Tod
+  //   if (this.isHurt()) return;   // verhindert Spam innerhalb des Hurt-Cooldowns
+  //   this.hit_sound.currentTime = 0;
+  //   this.hit_sound.play();
+  //   super.hit();                  // zieht Energie ab + setzt lastHit nur wenn nicht tot
+  // }
+  hit() {
+    if (this.isDead()) return;
+    if (this.isHurt()) return;
+    super.hit();
+    if (this.isDead()) {
+      if (!this.die_sound_played) {
+        this.die_sound.currentTime = 0;
+        this.die_sound.play();
+        this.die_sound_played = true;
+      }
+      return;
+    }
+    this.hit_sound.currentTime = 0;
+    this.hit_sound.play();
+  }
+
   jump() {
     this.speedY = 25;
     this.jump_sound.currentTime = 0;
