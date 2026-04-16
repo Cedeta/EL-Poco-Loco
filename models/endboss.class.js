@@ -6,6 +6,9 @@ class Endboss extends MovableObject {
   speed = 25;
   activated = false;
   enterSoundPlayed = false;
+  energy = 100;
+  dead = false;
+  deathTime = 0;
 
   enter_sound = new Audio("./audio/boss-enter.flac");
   target = null;
@@ -44,6 +47,8 @@ class Endboss extends MovableObject {
     super().loadImage(this.IMAGES_WALKING[0]);
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_ATTACK);
+    this.loadImages(this.IMAGES_HURT);
+    this.loadImages(this.IMAGES_DEAD);
     this.animate();
   }
 
@@ -59,9 +64,28 @@ class Endboss extends MovableObject {
     }
   }
 
+  hitByBottle() {
+    if (this.dead) return;
+
+    this.hit(); 
+
+    if (this.isDead()) {
+      this.dead = true;
+      this.deathTime = new Date().getTime();
+    }
+  }
+
   // Animation endboss
   animate() {
     setInterval(() => {
+      if (this.dead) {
+        this.playAnimation(this.IMAGES_DEAD);
+        return;
+      }
+      if (this.isHurt()) {
+        this.playAnimation(this.IMAGES_HURT);
+        return;
+      }
       if (this.activated && this.target) {
         const distance = Math.abs(this.x - this.target.x);
         if (distance < 120) {

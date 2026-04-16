@@ -36,46 +36,104 @@ throwableObjects = [];
     this.character.world = this;
   }
 
-  // prüft ob der character mit enemies kollidiert
-  checkCollisions() {
-    setInterval(() => {
-      if (this.gameOver) return;
-      this.level.enemies.forEach((enemy) => {
-        if (this.character.isColliding(enemy)) {
-          this.character.hit();
-          console.log("collision with Character", this.character.energy);
-        }
-      });
-      const coinsBefore = this.level.coins.length;
-      this.level.coins = this.level.coins.filter(
-        (coin) => !this.character.isColliding(coin)
-      );
-      this.collectedCoins += (coinsBefore - this.level.coins.length);
-      const bottlesBefore = this.level.bottles.length;
-      this.level.bottles = this.level.bottles.filter(
-        (bottle) => !this.character.isColliding(bottle)
-      );
-      this.collectedBottles += (bottlesBefore - this.level.bottles.length);
-    }, 200);
-  }
-
-  checkThrowObjects() {
-    setInterval(() => {
-      this.throwableObjects = this.throwableObjects.filter(
-        (bottle) => bottle.y < 426 - bottle.height
-      );
-      if (this.keyboard.SPACE && this.collectedBottles > 0) {
-        let bottle = new ThrowableObject(
-          this.character.x + 50,
-          this.character.y + 100,
-          this.character.otherDirection
+    // prüft ob der character mit enemies kollidiert
+    checkCollisions() {
+      setInterval(() => {
+        if (this.gameOver) return;
+  
+        // Character vs Enemies (Schaden für Spieler)
+        this.level.enemies.forEach((enemy) => {
+          if (this.character.isColliding(enemy)) {
+            this.character.hit();
+            console.log("collision with Character", this.character.energy);
+          }
+        });
+  
+        // Character vs Coins (einsammeln)
+        const coinsBefore = this.level.coins.length;
+        this.level.coins = this.level.coins.filter(
+          (coin) => !this.character.isColliding(coin)
         );
-        this.throwableObjects.push(bottle);
-        this.collectedBottles--;
-        this.keyboard.SPACE = false;
-      }
-    }, 200);
-  }
+        this.collectedCoins += (coinsBefore - this.level.coins.length);
+  
+        // Character vs Boden-Bottles (einsammeln)
+        const bottlesBefore = this.level.bottles.length;
+        this.level.bottles = this.level.bottles.filter(
+          (bottle) => !this.character.isColliding(bottle)
+        );
+        this.collectedBottles += (bottlesBefore - this.level.bottles.length);
+  
+        // Wurf-Flaschen vs Enemies
+        this.throwableObjects.forEach((bottle) => {
+          let hitSomething = false;
+  
+          this.level.enemies = this.level.enemies.filter((enemy) => {
+            if (bottle.isColliding(enemy)) {
+              hitSomething = true;
+  
+              // Chicken & SmallChicken: sofort entfernen
+              if (enemy instanceof Chicken) {
+                if (!enemy.isDead && typeof enemy.die === "function") {
+                  enemy.die();
+                }
+                return true; 
+              }
+              if (enemy instanceof SmallChicken) {
+                if (!enemy.isDead && typeof enemy.die === "function") {
+                  enemy.die();
+                }
+                return true;
+              }
+  
+              // Endboss: bei Treffer Schaden + Hurt/Dead Animation
+              if (enemy instanceof Endboss) {
+                if (typeof enemy.hitByBottle === "function") {
+                  enemy.hitByBottle();
+                }
+                return true;
+              }
+            }
+            return true;
+          });
+        });
+          // tote Chickens und Boss nach 500ms entfernen 
+          this.level.enemies = this.level.enemies.filter((enemy) => {
+            if (enemy instanceof Chicken && enemy.isDead) {
+              const aliveTime = new Date().getTime() - (enemy.deathTime || 0);
+              return aliveTime < 500;
+            }
+            if (enemy instanceof SmallChicken && enemy.isDead) {
+              const aliveTime = new Date().getTime() - (enemy.deathTime || 0);
+              return aliveTime < 500;
+            }
+            if (enemy instanceof Endboss && enemy.dead) {
+              const aliveTime = new Date().getTime() - (enemy.deathTime || 0);
+              return aliveTime < 1500;
+            }
+            return true;
+          });
+      }, 200);
+    }
+
+    checkThrowObjects() {
+      setInterval(() => {
+        this.throwableObjects = this.throwableObjects.filter(
+          (bottle) => bottle.y < 426 - bottle.height
+        );
+  
+        // Flasche werfen
+        if (this.keyboard.SPACE && this.collectedBottles > 0) {
+          let bottle = new ThrowableObject(
+            this.character.x + 50,
+            this.character.y + 100,
+            this.character.otherDirection
+          );
+          this.throwableObjects.push(bottle);
+          this.collectedBottles--;
+          this.keyboard.SPACE = false;
+        }
+      }, 200);
+    }
 
   draw() {
     // canvas leeren damit alles neu gezeichnet werden kann
