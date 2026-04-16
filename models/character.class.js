@@ -70,9 +70,11 @@ class Character extends MovableObject {
 
   world;
 
-  // Sound hinzufügen (laufen)
+  // Sound 
+
+  //(laufen)
   walking_sound = new Audio("./audio/footstep.wav");
-  jump_sound = new Audio("./audio/Jump.wav");
+  jump_sound = new Audio("./audio/jump.wav");
   // idle_sound = new Audio("./audio/snoring.wav");
 
   constructor() {
@@ -109,7 +111,7 @@ class Character extends MovableObject {
         this.long_standing = 0;
       }
       // Nach oben Springen
-      this.jump_sound.pause();
+      // this.jump_sound.pause();
       if (this.world.keyboard.UP && !this.isAboveGround()) {
         this.jump();
         this.jump_sound.play();
@@ -170,8 +172,9 @@ class Character extends MovableObject {
   }
 
   
-
   jump() {
     this.speedY = 25;
+    this.jump_sound.currentTime = 0;
+    this.jump_sound.play();
   }
 }
