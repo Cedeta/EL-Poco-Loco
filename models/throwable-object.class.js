@@ -22,9 +22,9 @@ class ThrowableObject extends MovableObject {
     throw() {
       setInterval(() => {
         if (this.otherDirection) {
-          this.x -= 10;
+          this.x -= 14;
         } else {
-          this.x += 10;
+          this.x += 14;
         }
       }, 1000 / 25);
   
