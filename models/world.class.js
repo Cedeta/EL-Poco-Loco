@@ -71,6 +71,11 @@ class World {
 // Bossbereich-Trigger 
     if (!this.bossMusicStarted && this.character.x >= 3300) {
       this.bossMusicStarted = true;
+      this.level.enemies.forEach((enemy) => {
+        if (enemy instanceof Endboss) {
+          enemy.activate(this.character);
+        }
+      });
       if (window.soundEnabled !== false) {
         this.bossMusic.currentTime = 0;
         this.bossMusic.play();
