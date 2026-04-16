@@ -1,3 +1,20 @@
+function createCoins(count) {
+  const coins = [];
+  for (let i = 0; i < count; i++) {
+    const x = 200 + Math.random() * 3000;
+    coins.push(new Coin(x));
+  }
+  return coins;
+}
+function createBottles(count) {
+  const bottles = [];
+  for (let i = 0; i < count; i++) {
+    const x = 200 + Math.random() * 3000;
+    bottles.push(new Bottle(x));
+  }
+  return bottles;
+}
+
 const level1 = new Level(
   [
     new Chicken(),
@@ -20,6 +37,7 @@ const level1 = new Level(
   ],
 
   [new Cloud()],
+
 
   [
     new BackgroundObject("./assets/img/5_background/layers/air.png", -719),
@@ -119,5 +137,7 @@ const level1 = new Level(
       "./assets/img/5_background/layers/1_first_layer/2.png",
       719 * 5
     ),
-  ]
+  ],
+  createCoins(15),
+  createBottles(8),
 );

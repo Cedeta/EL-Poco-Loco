@@ -34,6 +34,12 @@ class World {
           console.log("collision with Character", this.character.energy);
         }
       });
+      this.level.coins = this.level.coins.filter(
+        (coin) => !this.character.isColliding(coin)
+      );
+      this.level.bottles = this.level.bottles.filter(
+        (bottle) => !this.character.isColliding(bottle)
+      );
     }, 200);
   }
 
@@ -60,6 +66,8 @@ class World {
     this.ctx.translate(this.camera_x, 0);
 
     this.addToMap(this.character);
+    this.addObjectsToMap(this.level.coins);
+    this.addObjectsToMap(this.level.bottles);
     this.addObjectsToMap(this.level.enemies);
 
     // kamera wieder zurück
