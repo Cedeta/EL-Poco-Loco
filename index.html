@@ -23,14 +23,31 @@
 </head>
 
 <body onload="init()">
-
     <h1>EL POLLO LOCO</h1>
-
-
-    <canvas id="canvas" width="720" height="480">
-
-    </canvas>
-
-</body>
+    <div id="game-container">
+      <canvas id="canvas" width="720" height="480"></canvas>
+      <div id="start-overlay">
+        <img
+          id="start-screen-img"
+          src="./assets/img/9_intro_outro_screens/start/startscreen_1.png"
+          alt="Startscreen"
+        />
+        <button id="start-button" onclick="startGame()">
+          START
+        </button>
+      </div>
+      <div id="gameover-overlay" style="display:none;">
+        <img
+          id="gameover-img"
+          src="./assets/img/9_intro_outro_screens/game_over/game over.png"
+          alt="Game Over"
+        />
+        <div id="gameover-buttons">
+            <button class="gameover-btn" onclick="backToMenu()">Zum Startmenu</button>
+            <button class="gameover-btn" onclick="restartGame()">Neu starten</button>
+          </div>
+      </div>
+    </div>
+  </body>
 
 </html>

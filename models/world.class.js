@@ -7,6 +7,7 @@ class World {
   keyboard;
   camera_x = 0;
   statusBar = new StatusBarHealth(20, 0);
+  gameOver = false;
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
@@ -24,6 +25,7 @@ class World {
   // prüft ob der character mit enemies kollidiert
   checkCollisions() {
     setInterval(() => {
+      if (this.gameOver) return;
       this.level.enemies.forEach((enemy) => {
         if (this.character.isColliding(enemy)) {
           this.character.hit();
@@ -63,6 +65,7 @@ class World {
 
     // draw immer wieder aufrufen damit es animiert wird
     let self = this;
+    if (this.gameOver) return;
     requestAnimationFrame(function () {
       self.draw();
     });

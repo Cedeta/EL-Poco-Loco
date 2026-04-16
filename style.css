@@ -10,3 +10,80 @@ body {
 canvas {
     background-color: black;
 }
+
+#game-container {
+    position: relative;
+    width: 720px;
+    height: 480px;
+  }
+  #start-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #start-screen-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+  #start-button {
+    position: relative;
+    z-index: 11;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 16px 38px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 28px;
+    cursor: pointer;
+    transition: transform 120ms ease, background-color 120ms ease;
+  }
+  #start-button:hover {
+    background: #111;
+    transform: scale(1.03);
+  }
+
+  #gameover-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.753);
+  }
+  #gameover-img {
+    width: 720px;
+    height: 480px;
+    object-fit: cover;
+  }
+
+  #gameover-buttons {
+    position: absolute;
+    bottom: 50px;
+    display: flex;
+    gap: 16px;
+    z-index: 21;
+  }
+  .gameover-btn {
+    background: #f2a900; 
+    color: #000;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 120ms ease, background-color 120ms ease;
+  }
+  .gameover-btn:hover {
+    background: #ffb300;
+    transform: scale(1.04);
+  }

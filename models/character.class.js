@@ -75,7 +75,7 @@ class Character extends MovableObject {
   // Sounds
   walking_sound = new Audio("./audio/footstep.wav");
   jump_sound = new Audio("./audio/jump.wav");
-  // idle_sound = new Audio("./audio/snoring.wav"); // snoring sound benötigt eine User Interaction um zu starten, wird eingebaut sobald der playbutton eingebaut wird
+  idle_sound = new Audio("./audio/snoring.wav"); 
   hit_sound = new Audio("./audio/hit.wav");
   die_sound = new Audio("./audio/die.mp3");
 
@@ -104,6 +104,9 @@ class Character extends MovableObject {
         this.otherDirection = false;
         this.walking_sound.play();
         this.long_standing = 0;
+        this.idle_sound.pause();
+        this.idle_sound.currentTime = 0;
+        this.isSnoring = false;
       }
       // nach links laufen
       if (this.world.keyboard.LEFT && this.x > 0) {
@@ -111,6 +114,9 @@ class Character extends MovableObject {
         this.otherDirection = true;
         this.walking_sound.play();
         this.long_standing = 0;
+        this.idle_sound.pause();
+        this.idle_sound.currentTime = 0;
+        this.isSnoring = false;
       }
       // Nach oben Springen
       // this.jump_sound.pause();
@@ -118,6 +124,9 @@ class Character extends MovableObject {
         this.jump();
         this.jump_sound.play();
         this.long_standing = 0;
+        this.idle_sound.pause();
+        this.idle_sound.currentTime = 0;
+        this.isSnoring = false;
       }
     }
       this.world.camera_x = -this.x + 60;
@@ -140,6 +149,8 @@ class Character extends MovableObject {
           } else {
             // Animation fertig - am letzten Bild bleiben
             this.deadAnimationFinished = true;
+            this.world.gameOver = true;
+            if (typeof window.showGameOver === "function") window.showGameOver();
             let lastImage = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
             this.img = this.imageCache[lastImage];
           }
@@ -164,32 +175,32 @@ class Character extends MovableObject {
           
           // Nach 3 Sekunden (3000ms) zur long_idle Animation wechseln
           if (this.long_standing >= 3000) {
-            // if (!this.isSnoring) {
-            //   this.idle_sound.currentTime = 0;
-            //   this.idle_sound.play();
-            //   this.isSnoring = true;
-            // }
+            if (!this.isSnoring) {
+              this.idle_sound.currentTime = 0;
+              this.idle_sound.play();
+              this.isSnoring = true;
+            }
             this.playAnimation(this.IMAGES_LONG_STANDING);
           } else {
             this.playAnimation(this.IMAGES_STANDING);
           }
         } else {
           this.long_standing = 0;
+          this.idle_sound.pause();
+          this.idle_sound.currentTime = 0;
+          this.isSnoring = false;
         }
       } else {
         this.long_standing = 0;
+        this.idle_sound.pause();
+        this.idle_sound.currentTime = 0;
+        this.isSnoring = false;
       }
     }, 200);
     
   }
 
-  // hit() {
-  //   if (this.isDead()) return;   // kein Sound/kein Schaden mehr nach Tod
-  //   if (this.isHurt()) return;   // verhindert Spam innerhalb des Hurt-Cooldowns
-  //   this.hit_sound.currentTime = 0;
-  //   this.hit_sound.play();
-  //   super.hit();                  // zieht Energie ab + setzt lastHit nur wenn nicht tot
-  // }
+
   hit() {
     if (this.isDead()) return;
     if (this.isHurt()) return;

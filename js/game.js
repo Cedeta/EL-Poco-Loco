@@ -2,12 +2,53 @@ let canvas;
 let world;
 let keyboard = new Keyboard();
 
+
 function init() {
   canvas = document.getElementById("canvas");
-  world = new World(canvas, keyboard);
-
-  console.log("my character is", world.character);
 }
+
+function startGame() {
+  const overlay = document.getElementById("start-overlay");
+  if (world) return; // doppelt starten verhindern
+  world = new World(canvas, keyboard);
+  if (overlay) overlay.style.display = "none";
+  // Audio-Entsperrung fürs Snoring (einmalig per User-Click)
+  const a = world.character.idle_sound;
+  a.currentTime = 0;
+  a.play()
+    .then(() => {
+      a.pause();
+      a.currentTime = 0;
+    })
+    .catch(() => {});
+}
+
+function showGameOver() {
+  const overlay = document.getElementById("gameover-overlay");
+  if (overlay) overlay.style.display = "flex";
+  if (world) world.gameOver = true;
+}
+
+function backToMenu() {
+  const gameover = document.getElementById("gameover-overlay");
+  const start = document.getElementById("start-overlay");
+  if (gameover) gameover.style.display = "none";
+  if (start) start.style.display = "flex";
+  world = null; // damit Start wieder ein neues World starten darf
+}
+function restartGame() {
+  const gameover = document.getElementById("gameover-overlay");
+  const start = document.getElementById("start-overlay");
+  if (gameover) gameover.style.display = "none";
+  if (start) start.style.display = "none";
+
+  world = new World(canvas, keyboard);
+}
+
+window.startGame = startGame;
+window.showGameOver = showGameOver;
+window.backToMenu = backToMenu;
+window.restartGame = restartGame;
 
 // Welche Taste wurde gedrückt
 window.addEventListener("keydown", (event) => {
