@@ -3,7 +3,7 @@ class Endboss extends MovableObject {
   width = 350;
   y = 95;
   x = 3950;
-  speed = 15;
+  speed = 25;
   activated = false;
   enterSoundPlayed = false;
 
