@@ -1,6 +1,7 @@
 let canvas;
 let world;
 let keyboard = new Keyboard();
+window.soundEnabled = true;
 
 
 function init() {
@@ -44,6 +45,17 @@ function restartGame() {
 
   world = new World(canvas, keyboard);
 }
+
+function toggleSound() {
+  window.soundEnabled = !window.soundEnabled;
+  const icon = document.getElementById("sound-toggle");
+  if (icon) {
+    icon.src = window.soundEnabled
+      ? "./assets/img/icons/volume.png"
+      : "./assets/img/icons/volume-mute.png";
+  }
+}
+window.toggleSound = toggleSound;
 
 window.startGame = startGame;
 window.showGameOver = showGameOver;

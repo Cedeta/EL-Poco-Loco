@@ -87,3 +87,17 @@ canvas {
     background: #ffb300;
     transform: scale(1.04);
   }
+
+  #sound-toggle {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: 24px;
+    height: 24px;
+    z-index: 12;
+    cursor: pointer;
+    transition: transform 120ms ease;
+  }
+  #sound-toggle:hover {
+    transform: scale(1.06);
+  }
