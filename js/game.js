@@ -72,12 +72,12 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "ArrowLeft") {
     keyboard.LEFT = true;
   }
-  // nach oben (springen?)
+  // nach oben (springen)
   if (event.key === "ArrowUp") {
     keyboard.UP = true;
   }
-  // nach oben (springen?)
-  if (event.key === "Space") {
+  //  Bottle werfen
+  if (event.code === "Space") {
     keyboard.SPACE = true;
   }
 
@@ -94,12 +94,12 @@ window.addEventListener("keyup", (event) => {
   if (event.key === "ArrowLeft") {
     keyboard.LEFT = false;
   }
-  // nach oben (springen?)
+  // nach oben springen
   if (event.key === "ArrowUp") {
     keyboard.UP = false;
   }
-  // nach oben (springen?)
-  if (event.key === "Space") {
+  //  Bottle werfen
+  if (event.code === "Space") {
     keyboard.SPACE = false;
   }
 

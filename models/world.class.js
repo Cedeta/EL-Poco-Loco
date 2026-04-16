@@ -16,6 +16,8 @@ collectedBottles = 0;
 maxCoins = 15;
 maxBottles = 8;
 
+throwableObjects = [];
+
   gameOver = false;
   bossMusicStarted = false;
   bossMusic = new Audio("./audio/final-boss-musik.wav");
@@ -27,6 +29,7 @@ maxBottles = 8;
     this.setWorld();
     this.draw();
     this.checkCollisions();
+    this.checkThrowObjects();
   }
 
   setWorld() {
@@ -53,6 +56,24 @@ maxBottles = 8;
         (bottle) => !this.character.isColliding(bottle)
       );
       this.collectedBottles += (bottlesBefore - this.level.bottles.length);
+    }, 200);
+  }
+
+  checkThrowObjects() {
+    setInterval(() => {
+      this.throwableObjects = this.throwableObjects.filter(
+        (bottle) => bottle.y < 426 - bottle.height
+      );
+      if (this.keyboard.SPACE && this.collectedBottles > 0) {
+        let bottle = new ThrowableObject(
+          this.character.x + 50,
+          this.character.y + 100,
+          this.character.otherDirection
+        );
+        this.throwableObjects.push(bottle);
+        this.collectedBottles--;
+        this.keyboard.SPACE = false;
+      }
     }, 200);
   }
 
@@ -90,7 +111,7 @@ maxBottles = 8;
     this.addObjectsToMap(this.level.coins);
     this.addObjectsToMap(this.level.bottles);
     this.addObjectsToMap(this.level.enemies);
-
+    this.addObjectsToMap(this.throwableObjects);
     // kamera wieder zurück
     this.ctx.translate(-this.camera_x, 0);
 
