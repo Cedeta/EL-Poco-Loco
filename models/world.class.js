@@ -8,6 +8,8 @@ class World {
   camera_x = 0;
   statusBar = new StatusBarHealth(20, 0);
   gameOver = false;
+  bossMusicStarted = false;
+  bossMusic = new Audio("./audio/final-boss-musik.wav");
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
@@ -65,6 +67,16 @@ class World {
 
     // draw immer wieder aufrufen damit es animiert wird
     let self = this;
+
+// Bossbereich-Trigger 
+    if (!this.bossMusicStarted && this.character.x >= 3300) {
+      this.bossMusicStarted = true;
+      if (window.soundEnabled !== false) {
+        this.bossMusic.currentTime = 0;
+        this.bossMusic.play();
+      }
+    }
+    
     if (this.gameOver) return;
     requestAnimationFrame(function () {
       self.draw();
