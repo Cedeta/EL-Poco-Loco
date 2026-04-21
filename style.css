@@ -101,3 +101,25 @@ canvas {
   #sound-toggle:hover {
     transform: scale(1.06);
   }
+
+  #win-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.863);
+  }
+  #win-img {
+    width: 720px;
+    height: 480px;
+    object-fit: contain;
+  }
+  #win-buttons {
+    position: absolute;
+    bottom: 50px;
+    display: flex;
+    gap: 16px;
+    z-index: 31;
+  }

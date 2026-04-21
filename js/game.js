@@ -46,6 +46,56 @@ function restartGame() {
   world = new World(canvas, keyboard);
 }
 
+function showWin() {
+  const win = document.getElementById("win-overlay");
+  const gameover = document.getElementById("gameover-overlay");
+  if (gameover) gameover.style.display = "none";
+  if (win) win.style.display = "flex";
+  if (world) {
+    world.gameOver = true;
+
+    if (world.bossMusic) {
+      world.bossMusic.pause();
+      world.bossMusic.currentTime = 0;
+    }
+
+    const c = world.character;
+    if (c) {
+      c.walking_sound.pause();
+      c.walking_sound.currentTime = 0;
+      c.jump_sound.pause();
+      c.jump_sound.currentTime = 0;
+      c.idle_sound.pause();
+      c.idle_sound.currentTime = 0;
+      c.hit_sound.pause();
+      c.hit_sound.currentTime = 0;
+      c.die_sound.pause();
+      c.die_sound.currentTime = 0;
+    }
+
+    world.level.enemies.forEach((enemy) => {
+      if (enemy && enemy.enter_sound) {
+        enemy.enter_sound.pause();
+        enemy.enter_sound.currentTime = 0;
+      }
+    });
+  }
+}
+function backToMenuFromWin() {
+  const win = document.getElementById("win-overlay");
+  const start = document.getElementById("start-overlay");
+  if (win) win.style.display = "none";
+  if (start) start.style.display = "flex";
+  world = null;
+}
+function restartGameFromWin() {
+  const win = document.getElementById("win-overlay");
+  const start = document.getElementById("start-overlay");
+  if (win) win.style.display = "none";
+  if (start) start.style.display = "none";
+  world = new World(canvas, keyboard);
+}
+
 function toggleSound() {
   window.soundEnabled = !window.soundEnabled;
   const icon = document.getElementById("sound-toggle");
@@ -61,6 +111,10 @@ window.startGame = startGame;
 window.showGameOver = showGameOver;
 window.backToMenu = backToMenu;
 window.restartGame = restartGame;
+
+window.showWin = showWin;
+window.backToMenuFromWin = backToMenuFromWin;
+window.restartGameFromWin = restartGameFromWin;
 
 // Welche Taste wurde gedrückt
 window.addEventListener("keydown", (event) => {

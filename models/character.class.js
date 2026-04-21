@@ -95,6 +95,7 @@ class Character extends MovableObject {
   // ( Info ) % heist Modulu
   animate() {
     setInterval(() => {
+      if (this.world && this.world.gameOver) return;
       // Bewegung nur erlauben, wenn nicht Tod ist
       if (!this.isDead()) {
       
@@ -139,6 +140,7 @@ class Character extends MovableObject {
     
 
     setInterval(() => {
+      if (this.world && this.world.gameOver) return;
       if (this.isDead()) {
         if (!this.die_sound_played) {
           this.die_sound.currentTime = 0;
@@ -176,6 +178,7 @@ class Character extends MovableObject {
 
     // Langsamere Animation für Stand-Animation
     setInterval(() => {
+      if (this.world && this.world.gameOver) return;
       if (!this.isDead() && !this.isHurt() && !this.isAboveGround()) {
         if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {
           this.long_standing += 200;

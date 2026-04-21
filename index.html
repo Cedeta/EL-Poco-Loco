@@ -60,6 +60,17 @@
             <button class="gameover-btn" onclick="restartGame()">Neu starten</button>
           </div>
       </div>
+      <div id="win-overlay" style="display:none;">
+        <img
+          id="win-img"
+          src="./assets/img/9_intro_outro_screens/win/win_2.png"
+          alt="You Win"
+        />
+        <div id="win-buttons">
+          <button class="gameover-btn" onclick="backToMenuFromWin()">Zum Startmenu</button>
+          <button class="gameover-btn" onclick="restartGameFromWin()">Neu starten</button>
+        </div>
+      </div>
     </div>
   </body>
 
