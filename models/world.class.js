@@ -9,6 +9,7 @@ class World {
   statusBar = new StatusBarHealth(20, 0);
   statusBarCoin = new StatusBarCoin(20, 45);
   statusBarBottle = new StatusBarBottle(20, 90);
+  statusBarEndboss = new StatusBarEndboss(480, 0);
 
 collectedCoins = 0;
 collectedBottles = 0;
@@ -160,6 +161,11 @@ throwableObjects = [];
     if (this.statusBarBottle) {
       this.statusBarBottle.setPercentage((this.collectedBottles / this.maxBottles) * 100);
       this.addToMap(this.statusBarBottle);
+    }
+    let boss = this.level.enemies.find((e) => e instanceof Endboss);
+    if (this.statusBarEndboss && this.bossMusicStarted && boss && !boss.dead) {
+      this.statusBarEndboss.setPercentage(boss.energy);
+      this.addToMap(this.statusBarEndboss);
     }
 
     // kamera nochmal verschieben für character und enemies
