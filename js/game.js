@@ -99,9 +99,9 @@ window.addEventListener("keyup", (event) => {
     keyboard.UP = false;
   }
   //  Bottle werfen
-  if (event.code === "Space") {
-    keyboard.SPACE = false;
-  }
+  // if (event.code === "Space") {
+  //   keyboard.SPACE = false;
+  // }
 
   console.log(event);
 });

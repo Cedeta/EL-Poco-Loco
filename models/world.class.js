@@ -15,7 +15,7 @@ collectedCoins = 0;
 collectedBottles = 0;
 
 maxCoins = 15;
-maxBottles = 8;
+maxBottles = 5;
 
 throwableObjects = [];
 
@@ -57,50 +57,47 @@ throwableObjects = [];
         );
         this.collectedCoins += (coinsBefore - this.level.coins.length);
   
-        // Character vs Boden-Bottles (einsammeln)
-        const bottlesBefore = this.level.bottles.length;
-        this.level.bottles = this.level.bottles.filter(
-          (bottle) => !this.character.isColliding(bottle)
-        );
-        this.collectedBottles += (bottlesBefore - this.level.bottles.length);
-  
-        // Wurf-Flaschen vs Enemies
-        this.throwableObjects.forEach((bottle) => {
-          let hitSomething = false;
-  
-          this.level.enemies = this.level.enemies.filter((enemy) => {
-            if (bottle.isColliding(enemy)) {
-              hitSomething = true;
-  
-              // Chicken & SmallChicken: sofort entfernen
-              if (enemy instanceof Chicken) {
-                if (!enemy.isDead && typeof enemy.die === "function") {
-                  enemy.die();
-                }
-                return true; 
-              }
-              if (enemy instanceof SmallChicken) {
-                if (!enemy.isDead && typeof enemy.die === "function") {
-                  enemy.die();
-                }
-                return true;
-              }
-  
-              // Endboss: bei Treffer Schaden + Hurt/Dead Animation
-              if (enemy instanceof Endboss) {
-                if (typeof enemy.hitByBottle === "function") {
-                  enemy.hitByBottle();
-                }
-                return true;
-              }
-            }
-            return true;
-          });
+        // Character vs Boden-Bottles (einsammeln) – nur bis maxBottles
+        this.level.bottles = this.level.bottles.filter((bottle) => {
+          if (!this.character.isColliding(bottle)) return true;
+          if (this.collectedBottles >= this.maxBottles) return true; // Leiste voll → Bottle bleibt liegen
+          this.collectedBottles++;
+          return false; // eingesammelt → aus dem Level entfernen
         });
-          // tote Chickens und Boss nach 500ms entfernen 
-          this.level.enemies = this.level.enemies.filter((enemy) => {
-            if (enemy instanceof Chicken && enemy.isDead) {
-              const aliveTime = new Date().getTime() - (enemy.deathTime || 0);
+  
+        // Wurf-Flaschen vs Enemies (Flasche nach Treffer entfernen)
+const bottlesToRemove = new Set();
+this.throwableObjects.forEach((bottle, bottleIndex) => {
+  this.level.enemies = this.level.enemies.filter((enemy) => {
+    if (bottle.isColliding(enemy)) {
+      // Flasche soll nur einmal treffen
+      bottlesToRemove.add(bottleIndex);
+      if (enemy instanceof Chicken) {
+        if (!enemy.isDead && typeof enemy.die === "function") enemy.die();
+        return true;
+      }
+      if (enemy instanceof SmallChicken) {
+        if (!enemy.isDead && typeof enemy.die === "function") enemy.die();
+        return true;
+      }
+      if (enemy instanceof Endboss) {
+        if (typeof enemy.hitByBottle === "function") enemy.hitByBottle();
+        return true;
+      }
+    }
+    return true;
+  });
+});
+
+// getroffene Flaschen entfernen
+this.throwableObjects = this.throwableObjects.filter(
+  (_, i) => !bottlesToRemove.has(i)
+);
+
+// tote Chickens und Boss nach 500ms entfernen 
+   this.level.enemies = this.level.enemies.filter((enemy) => {
+      if (enemy instanceof Chicken && enemy.isDead) {
+        const aliveTime = new Date().getTime() - (enemy.deathTime || 0);
               return aliveTime < 500;
             }
             if (enemy instanceof SmallChicken && enemy.isDead) {
