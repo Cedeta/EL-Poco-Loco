@@ -147,6 +147,10 @@ class World {
 
   togglePause() {
     this.paused = !this.paused;
+    
+    if (!this.paused) {
+      this.draw();
+    }
   }
 
   draw() {
