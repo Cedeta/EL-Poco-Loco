@@ -126,6 +126,9 @@ function togglePauseUI() {
   if (world.gameOver) return;
 
   pausedUI = !pausedUI;
+  if (world && typeof world.togglePause === "function") {
+    world.togglePause();
+  }
   if (pausedUI) showPauseOverlay();
   else hidePauseOverlay();
 }
