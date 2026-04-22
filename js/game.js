@@ -132,6 +132,11 @@ function togglePauseUI() {
 
 window.togglePauseUI = togglePauseUI;
 
+function resumeGame() {
+  if (pausedUI) togglePauseUI();
+}
+window.resumeGame = resumeGame;
+
 function openHowto() {
   const o = document.getElementById("howto-overlay");
   if (o) o.style.display = "flex";
