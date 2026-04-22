@@ -95,6 +95,14 @@ class Character extends MovableObject {
   // ( Info ) % heist Modulu
   animate() {
     setInterval(() => {
+      if (this.world && this.world.paused) {
+        this.walking_sound.pause();
+        this.jump_sound.pause();
+        this.idle_sound.pause();
+        this.hit_sound.pause();
+        return;
+      }
+
       if (this.world && this.world.gameOver) return;
       // Bewegung nur erlauben, wenn nicht Tod ist
       if (!this.isDead()) {
@@ -140,6 +148,14 @@ class Character extends MovableObject {
     
 
     setInterval(() => {
+      if (this.world && this.world.paused) {
+        this.walking_sound.pause();
+        this.jump_sound.pause();
+        this.idle_sound.pause();
+        this.hit_sound.pause();
+        return;
+      }
+
       if (this.world && this.world.gameOver) return;
       if (this.isDead()) {
         if (!this.die_sound_played) {
@@ -178,6 +194,14 @@ class Character extends MovableObject {
 
     // Langsamere Animation für Stand-Animation
     setInterval(() => {
+      if (this.world && this.world.paused) {
+        this.walking_sound.pause();
+        this.jump_sound.pause();
+        this.idle_sound.pause();
+        this.hit_sound.pause();
+        return;
+      }
+      
       if (this.world && this.world.gameOver) return;
       if (!this.isDead() && !this.isHurt() && !this.isAboveGround()) {
         if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {

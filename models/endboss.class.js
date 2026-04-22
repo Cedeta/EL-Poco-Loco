@@ -78,6 +78,8 @@ class Endboss extends MovableObject {
   // Animation endboss
   animate() {
     setInterval(() => {
+      if (this.target && this.target.world && this.target.world.paused) return;
+      
       if (this.target && this.target.world && this.target.world.gameOver) {
         this.enter_sound.pause();
         this.enter_sound.currentTime = 0;

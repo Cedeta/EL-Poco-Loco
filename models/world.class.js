@@ -148,9 +148,15 @@ class World {
 
   togglePause() {
     this.paused = !this.paused;
+    if (this.paused) {
+      if (this.bossMusic) this.bossMusic.pause();
+      return;
+    }
 
-    if (!this.paused) {
-      this.draw();
+    this.draw();
+
+    if (this.bossMusicStarted && window.soundEnabled !== false) {
+      this.bossMusic.play().catch(() => {});
     }
   }
 
