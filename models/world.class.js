@@ -20,6 +20,7 @@ class World {
   throwableObjects = [];
 
   gameOver = false;
+  paused = false;
   bossMusicStarted = false;
   bossMusic = new Audio("./audio/final-boss-musik.wav");
 
@@ -43,7 +44,7 @@ class World {
   // prüft ob der character mit enemies kollidiert
   checkCollisions() {
     setInterval(() => {
-      if (this.gameOver) return;
+      if (this.gameOver || this.paused) return;
 
       // Character vs Enemies (Schaden für Spieler)
       this.level.enemies.forEach((enemy) => {
@@ -125,7 +126,7 @@ class World {
 
   checkThrowObjects() {
     setInterval(() => {
-      if (this.gameOver) return;
+      if (this.gameOver || this.paused) return;
       this.throwableObjects = this.throwableObjects.filter(
         (bottle) => bottle.y < 426 - bottle.height
       );
