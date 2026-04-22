@@ -15,7 +15,8 @@ function createBottles(count) {
   return bottles;
 }
 
-const level1 = new Level(
+function createLevel1() {
+  return new Level(
   [
     new Chicken(),
     new Chicken(),
@@ -133,5 +134,7 @@ const level1 = new Level(
     ),
   ],
   createCoins(15),
-  createBottles(10),
+  createBottles(10)
 );
+}
+window.createLevel1 = createLevel1;

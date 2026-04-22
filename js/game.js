@@ -12,8 +12,11 @@ function startGame() {
   const overlay = document.getElementById("start-overlay");
   if (world) return; // doppelt starten verhindern
   world = new World(canvas, keyboard);
-  if (overlay) overlay.style.display = "none";
-  // Audio-Entsperrung fürs Snoring (einmalig per User-Click)
+
+  setTimeout(() => {
+    if (overlay) overlay.style.display = "none";
+  }, 50);
+
   const a = world.character.idle_sound;
   a.currentTime = 0;
   a.play()
