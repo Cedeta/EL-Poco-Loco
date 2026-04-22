@@ -38,7 +38,9 @@ function backToMenu() {
   const start = document.getElementById("start-overlay");
   if (gameover) gameover.style.display = "none";
   if (start) start.style.display = "flex";
-  world = null; // damit Start wieder ein neues World starten darf
+  hidePauseOverlay();
+  pausedUI = false;
+  world = null; 
 }
 
 function restartGame() {
