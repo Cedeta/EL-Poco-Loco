@@ -109,6 +109,29 @@ function toggleSound() {
   }
 }
 
+function showPauseOverlay() {
+  const o = document.getElementById("pause-overlay");
+  if (o) o.style.display = "flex";
+}
+
+function hidePauseOverlay() {
+  const o = document.getElementById("pause-overlay");
+  if (o) o.style.display = "none";
+}
+
+let pausedUI = false;
+
+function togglePauseUI() {
+  if (!world) return;
+  if (world.gameOver) return;
+
+  pausedUI = !pausedUI;
+  if (pausedUI) showPauseOverlay();
+  else hidePauseOverlay();
+}
+
+window.togglePauseUI = togglePauseUI;
+
 function openHowto() {
   const o = document.getElementById("howto-overlay");
   if (o) o.style.display = "flex";
@@ -153,6 +176,11 @@ window.addEventListener("keydown", (event) => {
   //  Bottle werfen
   if (event.code === "Space") {
     keyboard.SPACE = true;
+  }
+
+  // Pause
+  if ((event.key === "p" || event.key === "P") && !event.repeat) {
+    togglePauseUI();
   }
 
   console.log(event);
