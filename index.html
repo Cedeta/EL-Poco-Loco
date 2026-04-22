@@ -58,6 +58,7 @@
       <div class="howto-row"><span class="howto-key">← / →</span><span class="howto-text">Laufen</span></div>
       <div class="howto-row"><span class="howto-key">↑</span><span class="howto-text">Springen</span></div>
       <div class="howto-row"><span class="howto-key">Space</span><span class="howto-text">Flasche werfen</span></div>
+      <div class="howto-row"><span class="howto-key">P</span><span class="howto-text">Pause</span></div>
     </div>
     <h2 class="howto-title">Mobil</h2>
     <div class="howto-grid">
@@ -95,8 +96,8 @@
           <div id="pause-title">PAUSE</div>
           <div id="pause-hint">Drücke <b>P</b> zum Fortsetzen</div>
           <div id="pause-buttons">
-            <button class="gameover-btn">Weiter</button>
-            <button class="gameover-btn">Zum Startmenu</button>
+            <button class="gameover-btn"  onclick="resumeGame()">Weiter</button>
+            <button class="gameover-btn" onclick="backToMenu()">Zum Startmenu</button>
           </div>
         </div>
       </div>
