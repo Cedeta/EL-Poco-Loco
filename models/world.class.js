@@ -39,6 +39,7 @@ class World {
 
   setWorld() {
     this.character.world = this;
+    this.level.enemies.forEach(e => e.world = this);
   }
 
   // prüft ob der character mit enemies kollidiert
@@ -147,7 +148,7 @@ class World {
 
   togglePause() {
     this.paused = !this.paused;
-    
+
     if (!this.paused) {
       this.draw();
     }
