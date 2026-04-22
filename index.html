@@ -47,7 +47,26 @@
             src="./assets/img/icons/volume.png"
             alt="Sound an/aus"
             onclick="toggleSound()"
-/>
+         />
+
+<button id="howto-button" onclick="openHowto()">Anleitung</button>
+<div id="howto-overlay" style="display:none;">
+  <div id="howto-modal">
+    <button id="howto-back" class="gameover-btn" onclick="closeHowto()">Zurück</button>
+    <h2 class="howto-title">Steuerung</h2>
+    <div class="howto-grid">
+      <div class="howto-row"><span class="howto-key">← / →</span><span class="howto-text">Laufen</span></div>
+      <div class="howto-row"><span class="howto-key">↑</span><span class="howto-text">Springen</span></div>
+      <div class="howto-row"><span class="howto-key">Space</span><span class="howto-text">Flasche werfen</span></div>
+    </div>
+    <h2 class="howto-title">Mobil</h2>
+    <div class="howto-grid">
+      <div class="howto-row"><span class="howto-key">Links</span><span class="howto-text">Bewegung (Steuerkreuz)</span></div>
+      <div class="howto-row"><span class="howto-key">Rechts</span><span class="howto-text">Springen / Werfen</span></div>
+    </div>
+  </div>
+</div>
+
       </div>
       <div id="gameover-overlay" style="display:none;">
         <img
@@ -72,6 +91,12 @@
         </div>
       </div>
     </div>
+    <footer class="bg-credit">
+      Image by
+      <a href="https://pixabay.com/users/pexels-2286921/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=1866541" target="_blank" rel="noopener noreferrer">Pexels</a>
+      from
+      <a href="https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=1866541" target="_blank" rel="noopener noreferrer">Pixabay</a>
+    </footer>
   </body>
 
 </html>

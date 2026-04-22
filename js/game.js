@@ -37,6 +37,7 @@ function backToMenu() {
   if (start) start.style.display = "flex";
   world = null; // damit Start wieder ein neues World starten darf
 }
+
 function restartGame() {
   const gameover = document.getElementById("gameover-overlay");
   const start = document.getElementById("start-overlay");
@@ -81,6 +82,7 @@ function showWin() {
     });
   }
 }
+
 function backToMenuFromWin() {
   const win = document.getElementById("win-overlay");
   const start = document.getElementById("start-overlay");
@@ -88,6 +90,7 @@ function backToMenuFromWin() {
   if (start) start.style.display = "flex";
   world = null;
 }
+
 function restartGameFromWin() {
   const win = document.getElementById("win-overlay");
   const start = document.getElementById("start-overlay");
@@ -105,6 +108,20 @@ function toggleSound() {
       : "./assets/img/icons/volume-mute.png";
   }
 }
+
+function openHowto() {
+  const o = document.getElementById("howto-overlay");
+  if (o) o.style.display = "flex";
+}
+
+function closeHowto() {
+  const o = document.getElementById("howto-overlay");
+  if (o) o.style.display = "none";
+}
+
+window.openHowto = openHowto;
+window.closeHowto = closeHowto;
+
 window.toggleSound = toggleSound;
 
 window.startGame = startGame;
@@ -122,14 +139,17 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "ArrowRight") {
     keyboard.RIGHT = true;
   }
+
   // nach links gehen
   if (event.key === "ArrowLeft") {
     keyboard.LEFT = true;
   }
+
   // nach oben (springen)
   if (event.key === "ArrowUp") {
     keyboard.UP = true;
   }
+
   //  Bottle werfen
   if (event.code === "Space") {
     keyboard.SPACE = true;
@@ -144,18 +164,16 @@ window.addEventListener("keyup", (event) => {
   if (event.key === "ArrowRight") {
     keyboard.RIGHT = false;
   }
+
   // nach links gehen
   if (event.key === "ArrowLeft") {
     keyboard.LEFT = false;
   }
+
   // nach oben springen
   if (event.key === "ArrowUp") {
     keyboard.UP = false;
   }
-  //  Bottle werfen
-  // if (event.code === "Space") {
-  //   keyboard.SPACE = false;
-  // }
 
   console.log(event);
 });

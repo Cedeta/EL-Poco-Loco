@@ -5,17 +5,30 @@ body {
     justify-content: center;
     height: 100vh;
     margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-image: url("./assets/img/5_background/bg-image.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
 }
 
 canvas {
     background-color: black;
 }
 
+/* Canvas*/
 #game-container {
     position: relative;
     width: 720px;
     height: 480px;
+    font-family: Arial, Helvetica, sans-serif;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.45);
   }
+
+ /* Startscreen Overlay */
   #start-overlay {
     position: absolute;
     inset: 0;
@@ -24,6 +37,7 @@ canvas {
     align-items: center;
     justify-content: center;
   }
+  
   #start-screen-img {
     position: absolute;
     inset: 0;
@@ -32,6 +46,7 @@ canvas {
     object-fit: cover;
     pointer-events: none;
   }
+
   #start-button {
     position: relative;
     z-index: 11;
@@ -45,11 +60,13 @@ canvas {
     cursor: pointer;
     transition: transform 120ms ease, background-color 120ms ease;
   }
+
   #start-button:hover {
     background: #111;
     transform: scale(1.03);
   }
 
+  /* Gameover Overlay */
   #gameover-overlay {
     position: absolute;
     inset: 0;
@@ -59,6 +76,7 @@ canvas {
     justify-content: center;
     background: rgba(0, 0, 0, 0.753);
   }
+
   #gameover-img {
     width: 720px;
     height: 480px;
@@ -72,6 +90,7 @@ canvas {
     gap: 16px;
     z-index: 21;
   }
+
   .gameover-btn {
     background: #f2a900; 
     color: #000;
@@ -83,11 +102,13 @@ canvas {
     cursor: pointer;
     transition: transform 120ms ease, background-color 120ms ease;
   }
+
   .gameover-btn:hover {
     background: #ffb300;
     transform: scale(1.04);
   }
 
+/* Sound Toggle */
   #sound-toggle {
     position: absolute;
     right: 16px;
@@ -98,10 +119,12 @@ canvas {
     cursor: pointer;
     transition: transform 120ms ease;
   }
+
   #sound-toggle:hover {
     transform: scale(1.06);
   }
 
+/* Win Overlay */
   #win-overlay {
     position: absolute;
     inset: 0;
@@ -111,15 +134,122 @@ canvas {
     justify-content: center;
     background: rgba(0, 0, 0, 0.863);
   }
+
   #win-img {
     width: 720px;
     height: 480px;
     object-fit: contain;
   }
+
   #win-buttons {
     position: absolute;
     bottom: 50px;
     display: flex;
     gap: 16px;
     z-index: 31;
+  }
+
+/* Howto Overlay */
+  #howto-button {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    z-index: 12;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 120ms ease, background-color 120ms ease;
+  }
+
+  #howto-button:hover {
+    background: #111;
+    transform: scale(1.03);
+  }
+
+  #howto-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 15; 
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.78);
+  }
+
+  #howto-modal {
+    width: min(560px, 92%);
+    max-height: 86%;
+    overflow: auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+
+  #howto-back {
+    position: sticky;
+    top: 0;
+    margin-bottom: 12px;
+  }
+
+  .howto-title {
+    margin: 10px 0 8px 0;
+    font-size: 20px;
+  }
+
+  .howto-grid {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .howto-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 12px;
+    align-items: center;
+    background: rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+
+  .howto-key {
+    font-weight: 800;
+    background: rgba(0,0,0,0.10);
+    border-radius: 10px;
+    padding: 6px 8px;
+    text-align: center;
+  }
+
+  .howto-text {
+    font-weight: 600;
+  }
+
+/* Background Credit */
+  .bg-credit{
+    position: fixed;
+    right: 12px;
+    bottom: 10px;
+    z-index: 1000;
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+    background: rgba(0,0,0,0.45);
+    padding: 6px 10px;
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+
+  .bg-credit a{
+    color: rgba(255,255,255,0.95);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .bg-credit a:hover{
+    text-decoration: underline;
   }

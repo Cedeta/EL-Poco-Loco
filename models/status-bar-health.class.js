@@ -24,7 +24,6 @@ class StatusBarHealth extends DrawableObject {
     this.loadImage(this.IMAGES[5]);
   }
 
-  // gibt zurück welches bild verwendet werden soll basierend auf dem prozentwert
   resolveImageIndex() {
     if (this.percentage == 100) {
       return 5;
