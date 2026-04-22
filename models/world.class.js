@@ -219,7 +219,7 @@ class World {
       }
     }
     
-    if (this.gameOver) return;
+    if (this.gameOver || this.paused) return;
     requestAnimationFrame(function () {
       self.draw();
     });
