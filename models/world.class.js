@@ -145,6 +145,10 @@ class World {
     }, 200);
   }
 
+  togglePause() {
+    this.paused = !this.paused;
+  }
+
   draw() {
     // canvas leeren damit alles neu gezeichnet werden kann
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
