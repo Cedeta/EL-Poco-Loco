@@ -352,7 +352,7 @@ canvas {
   display: none;
   z-index: 50;
 }
-#dpad, #action-buttons{
+#dpad, #action-buttons, #pause-button{
   position: absolute;
   bottom: calc(18px + env(safe-area-inset-bottom));
   pointer-events: auto;
@@ -372,6 +372,11 @@ canvas {
 #dpad-left { grid-column: 1; grid-row: 2; }
 #dpad-right { grid-column: 3; grid-row: 2; }
 #action-buttons{ right: calc(18px + env(safe-area-inset-right)); grid-auto-flow: row; }
+
+#pause-button{
+  left: 50%;
+  transform: translateX(-50%);
+}
 
 .dpad-btn, .action-btn{
   border-radius: 12px;
