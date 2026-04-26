@@ -114,6 +114,17 @@ function toggleSound() {
   }
 }
 
+function toggleFullscreen() {
+  const container = document.getElementById("game-container");
+  if (!container) return;
+  if (document.fullscreenElement) {
+    document.exitFullscreen?.();
+  } else {
+    container.requestFullscreen?.();
+  }
+}
+window.toggleFullscreen = toggleFullscreen;
+
 function showPauseOverlay() {
   const o = document.getElementById("pause-overlay");
   if (o) o.style.display = "flex";
