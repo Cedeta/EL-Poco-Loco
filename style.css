@@ -359,7 +359,19 @@ canvas {
   display: grid;
   gap: 5px;
 }
-#dpad{ left: 12px; grid-template-columns: 42px 42px 42px; align-items: center; }
+#dpad{
+  left: 12px;
+  display: grid;
+  grid-template-columns: 42px 18px 42px;
+  grid-template-rows: 42px 42px;
+  gap: 4px;
+  align-items: center;
+  justify-items: center;
+}
+
+#dpad-up { grid-column: 2; grid-row: 1; }
+#dpad-left { grid-column: 1; grid-row: 2; }
+#dpad-right { grid-column: 3; grid-row: 2; }
 #action-buttons{ right: 12px; grid-auto-flow: row; }
 
 .dpad-btn, .action-btn{
