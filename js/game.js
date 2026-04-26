@@ -204,6 +204,22 @@ window.showWin = showWin;
 window.backToMenuFromWin = backToMenuFromWin;
 window.restartGameFromWin = restartGameFromWin;
 
+function initTouchControls() {
+  const left = document.getElementById("dpad-left");
+  const right = document.getElementById("dpad-right");
+  if (left) {
+    left.addEventListener("touchstart", (e) => { e.preventDefault(); keyboard.LEFT = true; }, { passive: false });
+    left.addEventListener("touchend", (e) => { e.preventDefault(); keyboard.LEFT = false; }, { passive: false });
+    left.addEventListener("touchcancel", (e) => { e.preventDefault(); keyboard.LEFT = false; }, { passive: false });
+  }
+  if (right) {
+    right.addEventListener("touchstart", (e) => { e.preventDefault(); keyboard.RIGHT = true; }, { passive: false });
+    right.addEventListener("touchend", (e) => { e.preventDefault(); keyboard.RIGHT = false; }, { passive: false });
+    right.addEventListener("touchcancel", (e) => { e.preventDefault(); keyboard.RIGHT = false; }, { passive: false });
+  }
+}
+window.addEventListener("load", initTouchControls);
+
 // Welche Taste wurde gedrückt
 window.addEventListener("keydown", (event) => {
   // nach Rechts gehen
@@ -233,6 +249,8 @@ window.addEventListener("keydown", (event) => {
 
   console.log(event);
 });
+
+
 
 // sobald die Taste wieder losgelassen wird
 window.addEventListener("keyup", (event) => {

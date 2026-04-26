@@ -390,25 +390,26 @@ canvas {
 
 /* Media Queries */
 @media (max-aspect-ratio: 1/1) {
-  #rotate-overlay { display: flex; }
-}
-
-@media (hover: none) {
-  html, body { height: 100%; }
+  #rotate-overlay {
+    display: flex;
+  }
 }
 
 @media (pointer: coarse) {
-  #howto-overlay{
+  #howto-overlay {
     position: fixed;
     inset: 0;
     z-index: 20000;
   }
-  #howto-modal{
+
+  #howto-modal {
     width: min(560px, 94vw);
     max-height: 90svh;
   }
 }
 
 @media (pointer: coarse) and (min-aspect-ratio: 1/1) {
-  body.game-started #mobile-controls { display: block; }
+  body.game-started #mobile-controls {
+    display: block;
+  }
 }
