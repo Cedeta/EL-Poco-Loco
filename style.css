@@ -385,6 +385,18 @@ canvas {
   html, body { height: 100%; }
 }
 
-@media (min-aspect-ratio: 1/1) {
-  #mobile-controls { display: block; }
+@media (pointer: coarse) {
+  #howto-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+  }
+  #howto-modal{
+    width: min(560px, 94vw);
+    max-height: 90svh;
+  }
+}
+
+@media (pointer: coarse) and (min-aspect-ratio: 1/1) {
+  body.game-started #mobile-controls { display: block; }
 }

@@ -12,6 +12,8 @@ function startGame() {
   const overlay = document.getElementById("start-overlay");
   if (world) return; 
 
+  document.body.classList.add("game-started");
+
   const container = document.getElementById("game-container");
   const isTouch = window.matchMedia?.("(pointer: coarse)")?.matches;
   if (isTouch && container && !document.fullscreenElement) {
@@ -47,6 +49,7 @@ function backToMenu() {
   if (start) start.style.display = "flex";
   hidePauseOverlay();
   pausedUI = false;
+  document.body.classList.remove("game-started");
   world = null; 
 }
 
@@ -100,6 +103,7 @@ function backToMenuFromWin() {
   const start = document.getElementById("start-overlay");
   if (win) win.style.display = "none";
   if (start) start.style.display = "flex";
+  document.body.classList.remove("game-started");
   world = null;
 }
 
