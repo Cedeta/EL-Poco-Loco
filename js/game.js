@@ -207,6 +207,7 @@ window.restartGameFromWin = restartGameFromWin;
 function initTouchControls() {
   const left = document.getElementById("dpad-left");
   const right = document.getElementById("dpad-right");
+  const up = document.getElementById("dpad-up");
   if (left) {
     left.addEventListener("touchstart", (e) => { e.preventDefault(); keyboard.LEFT = true; }, { passive: false });
     left.addEventListener("touchend", (e) => { e.preventDefault(); keyboard.LEFT = false; }, { passive: false });
@@ -216,6 +217,11 @@ function initTouchControls() {
     right.addEventListener("touchstart", (e) => { e.preventDefault(); keyboard.RIGHT = true; }, { passive: false });
     right.addEventListener("touchend", (e) => { e.preventDefault(); keyboard.RIGHT = false; }, { passive: false });
     right.addEventListener("touchcancel", (e) => { e.preventDefault(); keyboard.RIGHT = false; }, { passive: false });
+  }
+  if (up) {
+    up.addEventListener("touchstart", (e) => { e.preventDefault(); keyboard.UP = true; }, { passive: false });
+    up.addEventListener("touchend", (e) => { e.preventDefault(); keyboard.UP = false; }, { passive: false });
+    up.addEventListener("touchcancel", (e) => { e.preventDefault(); keyboard.UP = false; }, { passive: false });
   }
 }
 window.addEventListener("load", initTouchControls);
