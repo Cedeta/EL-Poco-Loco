@@ -30,7 +30,7 @@
 </head>
 
 <body onload="init()">
-    <h1>EL POLLO LOCO</h1>
+    <!-- <h1>EL POLLO LOCO</h1> -->
     <div id="game-container">
       <canvas id="canvas" width="720" height="480"></canvas>
       <div id="start-overlay">
@@ -69,7 +69,7 @@
     <h2 class="howto-title">Mobil</h2>
     <div class="howto-grid">
       <div class="howto-row"><span class="howto-key">Links</span><span class="howto-text">Bewegung (Steuerkreuz)</span></div>
-      <div class="howto-row"><span class="howto-key">Rechts</span><span class="howto-text">Springen / Werfen</span></div>
+      <div class="howto-row"><span class="howto-key">Rechts</span><span class="howto-text">Oben Werfen / Unten Springen</span></div>
     </div>
   </div>
 </div>
@@ -110,11 +110,11 @@
       <div id="mobile-controls" aria-hidden="true">
         <div id="dpad">
           <button class="dpad-btn" id="dpad-left">◀</button>
-          <button class="dpad-btn" id="dpad-up">▲</button>
           <button class="dpad-btn" id="dpad-right">▶</button>
         </div>
         <div id="action-buttons">
           <button class="action-btn" id="btn-throw">Werfen</button>
+          <button class="action-btn" id="btn-jump">Springen</button>
         </div>
       </div>
     </div>

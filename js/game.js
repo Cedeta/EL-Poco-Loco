@@ -207,21 +207,60 @@ window.restartGameFromWin = restartGameFromWin;
 function initTouchControls() {
   const left = document.getElementById("dpad-left");
   const right = document.getElementById("dpad-right");
-  const up = document.getElementById("dpad-up");
+  const throwBtn = document.getElementById("btn-throw");
+  const jumpBtn = document.getElementById("btn-jump");
+
   if (left) {
-    left.addEventListener("touchstart", (e) => { e.preventDefault(); keyboard.LEFT = true; }, { passive: false });
-    left.addEventListener("touchend", (e) => { e.preventDefault(); keyboard.LEFT = false; }, { passive: false });
-    left.addEventListener("touchcancel", (e) => { e.preventDefault(); keyboard.LEFT = false; }, { passive: false });
+    left.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      left.setPointerCapture?.(e.pointerId);
+      keyboard.LEFT = true;
+    });
+    left.addEventListener("pointerup", (e) => {
+      e.preventDefault();
+      keyboard.LEFT = false;
+    });
+    left.addEventListener("pointercancel", (e) => {
+      e.preventDefault();
+      keyboard.LEFT = false;
+    });
+    left.addEventListener("pointerleave", (e) => {
+      e.preventDefault();
+      keyboard.LEFT = false;
+    });
   }
   if (right) {
-    right.addEventListener("touchstart", (e) => { e.preventDefault(); keyboard.RIGHT = true; }, { passive: false });
-    right.addEventListener("touchend", (e) => { e.preventDefault(); keyboard.RIGHT = false; }, { passive: false });
-    right.addEventListener("touchcancel", (e) => { e.preventDefault(); keyboard.RIGHT = false; }, { passive: false });
+    right.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      right.setPointerCapture?.(e.pointerId);
+      keyboard.RIGHT = true;
+    });
+    right.addEventListener("pointerup", (e) => {
+      e.preventDefault();
+      keyboard.RIGHT = false;
+    });
+    right.addEventListener("pointercancel", (e) => {
+      e.preventDefault();
+      keyboard.RIGHT = false;
+    });
+    right.addEventListener("pointerleave", (e) => {
+      e.preventDefault();
+      keyboard.RIGHT = false;
+    });
   }
-  if (up) {
-    up.addEventListener("touchstart", (e) => { e.preventDefault(); keyboard.UP = true; }, { passive: false });
-    up.addEventListener("touchend", (e) => { e.preventDefault(); keyboard.UP = false; }, { passive: false });
-    up.addEventListener("touchcancel", (e) => { e.preventDefault(); keyboard.UP = false; }, { passive: false });
+  if (throwBtn) {
+    throwBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      keyboard.SPACE = true;
+      setTimeout(() => (keyboard.SPACE = false), 250);
+    });
+  }
+  if (jumpBtn) {
+    jumpBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      keyboard.UP = true;
+      setTimeout(() => (keyboard.UP = false), 150);
+    });
   }
 }
 window.addEventListener("load", initTouchControls);
