@@ -3,13 +3,16 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
     background-image: url("./assets/img/5_background/bg-image.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;
 
 }
 
@@ -21,7 +24,8 @@ canvas {
 /* Canvas*/
 #game-container {
     position: relative;
-    width: min(720px, 100vw); aspect-ratio: 720 / 480;
+    aspect-ratio: 720 / 480;
+    width: min(720px, 100vw, calc(100dvh * 3 / 2));
     height: auto;
     font-family: Arial, Helvetica, sans-serif;
     border-radius: 18px;
@@ -313,7 +317,7 @@ canvas {
   inset: 0;
   z-index: 9999;
   background: rgba(0,0,0,0.95);
-  display: flex;  
+  display: none;  
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -338,4 +342,13 @@ canvas {
   40%  { transform: rotate(-18deg) scale(1.02); }
   70%  { transform: rotate(18deg) scale(1.02); }
   100% { transform: rotate(0deg) scale(1); }
+}
+
+/* Media Queries */
+@media (max-aspect-ratio: 1/1) {
+  #rotate-overlay { display: flex; }
+}
+
+@media (hover: none) {
+  html, body { height: 100%; }
 }

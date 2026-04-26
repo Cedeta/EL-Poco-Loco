@@ -10,7 +10,14 @@ function init() {
 
 function startGame() {
   const overlay = document.getElementById("start-overlay");
-  if (world) return; // doppelt starten verhindern
+  if (world) return; 
+
+  const container = document.getElementById("game-container");
+  const isTouch = window.matchMedia?.("(pointer: coarse)")?.matches;
+  if (isTouch && container && !document.fullscreenElement) {
+    container.requestFullscreen?.().catch(() => {});
+  }
+
   world = new World(canvas, keyboard);
 
   setTimeout(() => {
@@ -117,13 +124,26 @@ function toggleSound() {
 function toggleFullscreen() {
   const container = document.getElementById("game-container");
   if (!container) return;
+
   if (document.fullscreenElement) {
-    document.exitFullscreen?.();
+    document.exitFullscreen?.().catch?.(() => {});
   } else {
-    container.requestFullscreen?.();
+    container.requestFullscreen?.().catch(() => {});
   }
 }
 window.toggleFullscreen = toggleFullscreen;
+
+function exitFullscreenOnPortrait() {
+  const isTouch = window.matchMedia?.("(pointer: coarse)")?.matches;
+  if (!isTouch) return;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  if (isPortrait && document.fullscreenElement) {
+    document.exitFullscreen?.().catch?.(() => {});
+  }
+}
+window.addEventListener("orientationchange", exitFullscreenOnPortrait);
+window.addEventListener("resize", exitFullscreenOnPortrait);
+
 
 function showPauseOverlay() {
   const o = document.getElementById("pause-overlay");
