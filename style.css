@@ -323,6 +323,7 @@ canvas {
   width: 140px;
   height: auto;
   filter: invert(1) brightness(1.2) contrast(1.2);
+  animation: rotateIcon 1.2s ease-in-out infinite;
 }
 #rotate-text{
   color: #fff;
@@ -332,3 +333,9 @@ canvas {
   padding: 0 18px;
 }
 
+@keyframes rotateIcon {
+  0%   { transform: rotate(0deg) scale(1); }
+  40%  { transform: rotate(-18deg) scale(1.02); }
+  70%  { transform: rotate(18deg) scale(1.02); }
+  100% { transform: rotate(0deg) scale(1); }
+}
