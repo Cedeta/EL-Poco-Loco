@@ -306,3 +306,29 @@ canvas {
   gap: 12px;
   flex-wrap: wrap;
 }
+
+/* Rotate Overlay */
+#rotate-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.95);
+  display: flex;  
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 26px;
+}
+#rotate-icon{
+  width: 140px;
+  height: auto;
+  filter: invert(1) brightness(1.2) contrast(1.2);
+}
+#rotate-text{
+  color: #fff;
+  font-weight: 400;
+  font-size: 18px;
+  text-align: center;
+  padding: 0 18px;
+}
+
