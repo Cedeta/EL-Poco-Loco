@@ -111,7 +111,7 @@ canvas {
 /* Sound Toggle */
   #sound-toggle {
     position: absolute;
-    right: 16px;
+    right: 56px;
     bottom: 16px;
     width: 24px;
     height: 24px;
@@ -123,6 +123,21 @@ canvas {
   #sound-toggle:hover {
     transform: scale(1.06);
   }
+
+  /* Fullscreen Toggle */
+#fullscreen-toggle {
+  position: absolute;
+  right: 16px;   
+  bottom: 17px;
+  width: 22px;
+  height: 22px;
+  z-index: 12;
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+#fullscreen-toggle:hover {
+  transform: scale(1.06);
+}
 
 /* Win Overlay */
   #win-overlay {
