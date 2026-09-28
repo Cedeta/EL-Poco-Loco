@@ -2,6 +2,12 @@ class Chicken extends MovableObject {
   y = 366;
   width = 55;
   height = 60;
+  offset = {
+    top: 5,
+    bottom: 5,
+    left: 5,
+    right: 5,
+  };
   isDead = false;
   deathTime = 0;
 

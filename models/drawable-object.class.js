@@ -5,6 +5,12 @@ class DrawableObject {
   x = 5;
   height = 230;
   width = 130;
+  offset = {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  };
 
   loadImage(path) {
     this.img = new Image();
@@ -24,17 +30,6 @@ class DrawableObject {
       } catch (e) {
         // Fehler beim Zeichnen ignorieren (Bild noch nicht geladen)
       }
-    }
-  }
-
-  
-  drawFrame(ctx) {
-    if (this instanceof Character || this instanceof Chicken || this instanceof Endboss) {
-      ctx.beginPath();
-      ctx.lineWidth = "5";
-      ctx.strokeStyle = "blue";
-      ctx.rect(this.x, this.y, this.width, this.height);
-      ctx.stroke();
     }
   }
 

@@ -48,11 +48,22 @@ class World {
     setInterval(() => {
       if (this.gameOver || this.paused) return;
 
-      // Character vs Enemies (Schaden für Spieler)
+      // Character vs Enemies (Kopf-Sprung nur bei Hühnern, Endboss immer Schaden)
       this.level.enemies.forEach((enemy) => {
-        if (this.character.isColliding(enemy)) {
+        if (!this.character.isColliding(enemy)) return;
+
+        if (enemy instanceof Endboss) {
           this.character.hit();
-          console.log("collision with Character", this.character.energy);
+          return;
+        }
+
+        if ((enemy instanceof Chicken || enemy instanceof SmallChicken) && !enemy.isDead) {
+          if (this.isStomping(enemy)) {
+            enemy.die();
+            this.character.speedY = 15;
+          } else {
+            this.character.hit();
+          }
         }
       });
 
@@ -123,7 +134,12 @@ class World {
 
         return true;
       });
-    }, 200);
+    }, 1000 / 60);
+  }
+
+  // Von oben fallend: ganze Huhn-Hitbox zählt (kein enger Kopf-Bereich)
+  isStomping(enemy) {
+    return this.character.speedY < 0 && this.character.isAboveGround();
   }
 
   checkThrowObjects() {
@@ -254,11 +270,6 @@ class World {
       this.flipImage(mo);
     }
     mo.draw(this.ctx);
-    
-    // wenn drawFrame existiert dann zeichne den rahmen (für debug)
-    if (mo.drawFrame) {
-      mo.drawFrame(this.ctx);
-    }
 
     // spiegelung wieder rückgängig machen
     if (mo.otherDirection) {

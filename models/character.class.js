@@ -3,6 +3,12 @@ class Character extends MovableObject {
   x = 0;
   // y = 193;
   y = 198;
+  offset = {
+    top: 100,
+    bottom: 10,
+    left: 35,
+    right: 35,
+  };
   long_standing = 0;
   deadAnimationCounter = 0;
   deadAnimationFinished = false;

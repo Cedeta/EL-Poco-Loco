@@ -1,6 +1,12 @@
 class Coin extends DrawableObject {
     width = 120;
     height = 120;
+    offset = {
+      top: 30,
+      bottom: 30,
+      left: 30,
+      right: 30,
+    };
   
     IMAGES = [
       "./assets/img/8_coin/coin_1.png",
