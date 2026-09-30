@@ -410,6 +410,21 @@ canvas {
 }
 
 @media (pointer: coarse) {
+  /* Vollbild ist auf Touch-Geräten überflüssig und verdeckt sonst die Steuerung. */
+  #fullscreen-toggle {
+    display: none;
+  }
+
+  /* Mute liegt oben rechts im Canvas, weg von den unteren Spiel-Buttons. */
+  #sound-toggle {
+    top: 8px;
+    right: 8px;
+    bottom: auto;
+    width: 32px;
+    height: 32px;
+    z-index: 60;
+  }
+
   #howto-overlay {
     position: fixed;
     inset: 0;
