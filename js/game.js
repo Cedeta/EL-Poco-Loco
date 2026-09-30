@@ -85,16 +85,28 @@ function stopActiveSounds() {
   world.character?.stopSounds();
   stopEnemyEnterSounds();
   stopSound(world.bossMusic);
+  stopSound(world.backgroundMusic);
   stopSound(world.winSound);
 }
 
 /**
- * Stoppt den Boss-Eintrittston, falls er noch läuft.
+ * Stoppt laufende Gegner-Clips, damit Mute sofort wirkt.
  * @returns {void}
  */
 function stopEnemyEnterSounds() {
   const enemies = world?.level?.enemies || [];
-  enemies.forEach((enemy) => stopSound(enemy.enter_sound));
+  enemies.forEach((enemy) => stopEnemyClips(enemy));
+}
+
+/**
+ * Stoppt Boss-Eintritt sowie Hühner-Schritte und Todes-Sound.
+ * @param {object} enemy - Gegner mit optionalen Audio-Clips.
+ * @returns {void}
+ */
+function stopEnemyClips(enemy) {
+  stopSound(enemy.enter_sound);
+  stopSound(enemy.walking_sound);
+  stopSound(enemy.death_sound);
 }
 
 /**
@@ -143,10 +155,21 @@ function startGame() {
   unlockAudioOutput();
 }
 
+/**
+ * Stoppt die Musik der laufenden Welt, bevor sie ersetzt oder verlassen wird.
+ * @returns {void}
+ */
+function stopWorldAudio() {
+  if (!world) return;
+  stopSound(world.backgroundMusic);
+  stopSound(world.bossMusic);
+}
+
 function showGameOver() {
   const overlay = document.getElementById("gameover-overlay");
   if (overlay) overlay.style.display = "flex";
   if (world) world.gameOver = true;
+  stopWorldAudio();
 }
 
 function backToMenu() {
@@ -157,7 +180,8 @@ function backToMenu() {
   hidePauseOverlay();
   pausedUI = false;
   document.body.classList.remove("game-started");
-  world = null; 
+  stopWorldAudio();
+  world = null;
 }
 
 function restartGame() {
@@ -166,6 +190,7 @@ function restartGame() {
   if (gameover) gameover.style.display = "none";
   if (start) start.style.display = "none";
 
+  stopWorldAudio();
   world = new World(canvas, keyboard);
 }
 
@@ -180,6 +205,7 @@ function showWin() {
     world.character?.stopSounds();
     stopEnemyEnterSounds();
     stopSound(world.bossMusic);
+    stopSound(world.backgroundMusic);
   }
 }
 
@@ -189,6 +215,7 @@ function backToMenuFromWin() {
   if (win) win.style.display = "none";
   if (start) start.style.display = "flex";
   document.body.classList.remove("game-started");
+  stopWorldAudio();
   world = null;
 }
 
@@ -197,6 +224,7 @@ function restartGameFromWin() {
   const start = document.getElementById("start-overlay");
   if (win) win.style.display = "none";
   if (start) start.style.display = "none";
+  stopWorldAudio();
   world = new World(canvas, keyboard);
 }
 
@@ -210,7 +238,16 @@ function toggleSound() {
   saveSoundSetting();
   applySoundIcon();
   if (!window.soundEnabled) stopActiveSounds();
-  else world?.resumeBossMusic();
+  else resumeGameMusic();
+}
+
+/**
+ * Setzt Hintergrund- und Boss-Musik nach dem Einschalten fort.
+ * @returns {void}
+ */
+function resumeGameMusic() {
+  world?.resumeBackgroundMusic();
+  world?.resumeBossMusic();
 }
 
 function toggleFullscreen() {

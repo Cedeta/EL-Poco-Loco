@@ -23,6 +23,7 @@ class World {
   paused = false;
   bossActivated = false;
   bossMusic = new Audio("./audio/final-boss-musik.wav");
+  backgroundMusic = new Audio("./audio/bg-sound.mp3");
 
   winSoundPlayed = false;
   winSound = new Audio("./audio/win.wav");
@@ -32,10 +33,31 @@ class World {
     this.canvas = canvas;
     this.keyboard = keyboard;
     this.level = window.createLevel1();
+    this.bossMusic.volume = 0.18;
     this.setWorld();
     this.draw();
     this.checkCollisions();
     this.checkThrowObjects();
+    this.prepareBackgroundMusic();
+  }
+
+  /**
+   * Startet die Hintergrundmusik als Schleife unter den Spielsounds.
+   * @returns {void}
+   */
+  prepareBackgroundMusic() {
+    this.backgroundMusic.loop = true;
+    this.backgroundMusic.volume = 0.35;
+    this.resumeBackgroundMusic();
+  }
+
+  /**
+   * Setzt die Hintergrundmusik fort, außer im Boss, in Pause oder nach Spielende.
+   * @returns {void}
+   */
+  resumeBackgroundMusic() {
+    if (this.paused || this.gameOver || this.bossActivated) return;
+    playSound(this.backgroundMusic, false);
   }
 
   setWorld() {
@@ -171,6 +193,7 @@ class World {
     this.level.enemies.forEach((enemy) => {
       if (enemy instanceof Endboss) enemy.activate(this.character);
     });
+    this.backgroundMusic.pause();
     playSound(this.bossMusic);
   }
 
@@ -183,10 +206,12 @@ class World {
     if (this.paused) {
       this.character?.stopSounds();
       this.bossMusic.pause();
+      this.backgroundMusic.pause();
       return;
     }
     this.draw();
     this.resumeBossMusic();
+    this.resumeBackgroundMusic();
   }
 
   /**

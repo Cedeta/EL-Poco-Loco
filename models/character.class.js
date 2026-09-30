@@ -95,6 +95,8 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_LONG_STANDING);
     // Schnarchen bleibt leise, damit es Schritte und Sprünge nicht überdeckt.
     this.idle_sound.volume = 0.15;
+    this.walking_sound.volume = 0.2;
+    this.walking_sound.loop = true;
     this.applyGravity();
     this.animate();
   }
@@ -281,8 +283,11 @@ class Character extends MovableObject {
       stopSound(this.walking_sound);
       return;
     }
-    this.walking_sound.loop = true;
-    playSound(this.walking_sound, false);
+    const audio = this.walking_sound;
+    audio.volume = 0.2;
+    audio.loop = true;
+    if (!audio.paused) return;
+    playSound(audio, false);
   }
 
   /**
