@@ -104,7 +104,7 @@ class Character extends MovableObject {
   // Animation Charakter (/ laufen)
   // ( Info ) % heist Modulu
   animate() {
-    setInterval(() => {
+    trackInterval(() => {
       if (this.world && this.world.paused) {
         this.stopSounds();
         return;
@@ -122,7 +122,7 @@ class Character extends MovableObject {
     }, 1000 / 60);
     
 
-    setInterval(() => {
+    trackInterval(() => {
       if (this.world && this.world.paused) {
         this.stopSounds();
         return;
@@ -162,7 +162,7 @@ class Character extends MovableObject {
     }, 200);
 
     // Langsamere Animation für Stand-Animation
-    setInterval(() => {
+    trackInterval(() => {
       if (this.world && this.world.paused) {
         this.stopSounds();
         return;

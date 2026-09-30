@@ -2,8 +2,55 @@ let canvas;
 let world;
 let keyboard = new Keyboard();
 let pausedUI = false;
+let activeIntervals = [];
+let animationFrameId = 0;
 const SOUND_STORAGE_KEY = "soundEnabled";
 window.soundEnabled = true;
+
+/**
+ * Merkt sich ein Intervall, damit es beim Spielende gestoppt werden kann.
+ * @param {Function} callback - Ablauf, der wiederholt wird.
+ * @param {number} delay - Abstand in Millisekunden.
+ * @returns {number} ID des Intervalls.
+ */
+function trackInterval(callback, delay) {
+  const id = setInterval(callback, delay);
+  activeIntervals.push(id);
+  return id;
+}
+
+/**
+ * Merkt sich den nächsten Zeichen-Frame.
+ * @param {number} id - ID von requestAnimationFrame.
+ * @returns {void}
+ */
+function rememberFrame(id) {
+  animationFrameId = id;
+}
+
+/**
+ * Stoppt Bewegungsintervalle und den Zeichen-Loop nach Win oder Lose.
+ * @returns {void}
+ */
+function stopAllLoops() {
+  activeIntervals.forEach((id) => clearInterval(id));
+  activeIntervals = [];
+  cancelAnimationFrame(animationFrameId);
+  animationFrameId = 0;
+}
+
+/**
+ * Beendet die Welt: keine Bewegung, keine Kollision, keine Gameplay-Sounds.
+ * @returns {void}
+ */
+function endWorld() {
+  if (!world) return;
+  world.gameOver = true;
+  world.character?.stopSounds();
+  stopEnemyEnterSounds();
+  stopWorldAudio();
+  stopAllLoops();
+}
 
 /**
  * Lädt Canvas und den zuletzt gespeicherten Sound-Status.
@@ -168,8 +215,7 @@ function stopWorldAudio() {
 function showGameOver() {
   const overlay = document.getElementById("gameover-overlay");
   if (overlay) overlay.style.display = "flex";
-  if (world) world.gameOver = true;
-  stopWorldAudio();
+  endWorld();
 }
 
 function backToMenu() {
@@ -181,6 +227,7 @@ function backToMenu() {
   pausedUI = false;
   document.body.classList.remove("game-started");
   stopWorldAudio();
+  stopAllLoops();
   world = null;
 }
 
@@ -191,6 +238,7 @@ function restartGame() {
   if (start) start.style.display = "none";
 
   stopWorldAudio();
+  stopAllLoops();
   world = new World(canvas, keyboard);
 }
 
@@ -199,14 +247,7 @@ function showWin() {
   const gameover = document.getElementById("gameover-overlay");
   if (gameover) gameover.style.display = "none";
   if (win) win.style.display = "flex";
-  if (world) {
-    world.gameOver = true;
-
-    world.character?.stopSounds();
-    stopEnemyEnterSounds();
-    stopSound(world.bossMusic);
-    stopSound(world.backgroundMusic);
-  }
+  endWorld();
 }
 
 function backToMenuFromWin() {
@@ -216,6 +257,7 @@ function backToMenuFromWin() {
   if (start) start.style.display = "flex";
   document.body.classList.remove("game-started");
   stopWorldAudio();
+  stopAllLoops();
   world = null;
 }
 
@@ -225,6 +267,7 @@ function restartGameFromWin() {
   if (win) win.style.display = "none";
   if (start) start.style.display = "none";
   stopWorldAudio();
+  stopAllLoops();
   world = new World(canvas, keyboard);
 }
 

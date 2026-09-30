@@ -75,7 +75,7 @@ class Endboss extends MovableObject {
 
   // Animation endboss
   animate() {
-    setInterval(() => {
+    trackInterval(() => {
       if (this.target && this.target.world && this.target.world.paused) return;
       
       if (this.target && this.target.world && this.target.world.gameOver) {

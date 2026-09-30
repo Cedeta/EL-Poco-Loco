@@ -67,7 +67,7 @@ class World {
 
   // prüft ob der character mit enemies kollidiert
   checkCollisions() {
-    setInterval(() => {
+    trackInterval(() => {
       if (this.gameOver || this.paused) return;
 
       // Zuerst die ganze Stomp-Gruppe töten, danach erst abprallen.
@@ -239,7 +239,7 @@ class World {
   }
 
   checkThrowObjects() {
-    setInterval(() => {
+    trackInterval(() => {
       if (this.gameOver || this.paused) return;
       this.throwableObjects = this.throwableObjects.filter(
         (bottle) => bottle.y < 426 - bottle.height
@@ -358,9 +358,9 @@ class World {
     }
     
     if (this.gameOver || this.paused) return;
-    requestAnimationFrame(function () {
+    rememberFrame(requestAnimationFrame(function () {
       self.draw();
-    });
+    }));
   }
 
   addObjectsToMap(objects) {

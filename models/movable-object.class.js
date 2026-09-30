@@ -8,7 +8,7 @@ class MovableObject extends DrawableObject {
 
   // Gravitiy
   applyGravity() {
-    setInterval(() => {
+    trackInterval(() => {
       if (this.isAboveGround() || this.speedY > 0) {
         this.y -= this.speedY;
         this.speedY -= this.acceleration;

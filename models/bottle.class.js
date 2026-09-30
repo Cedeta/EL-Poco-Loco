@@ -25,7 +25,7 @@ class Bottle extends DrawableObject {
     }
   
     animate() {
-      setInterval(() => {
+      trackInterval(() => {
         const i = this.currentImage % this.IMAGES.length;
         const path = this.IMAGES[i];
         this.img = this.imageCache[path];

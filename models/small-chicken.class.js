@@ -98,9 +98,9 @@ class SmallChicken extends MovableObject {
 
   // Animation Chicken
   animate() {
-    setInterval(() => this.updateWalk(), 1000 / 60);
+    trackInterval(() => this.updateWalk(), 1000 / 60);
     
-    setInterval(() => {
+    trackInterval(() => {
       if (this.world && this.world.paused) return;
       if (!this.isDead) this.playAnimation(this.IMAGES_WALKING);
     }, 280);

@@ -20,7 +20,7 @@ class ThrowableObject extends MovableObject {
     }
   
     throw() {
-      setInterval(() => {
+      trackInterval(() => {
         if (this.otherDirection) {
           this.x -= 14;
         } else {
@@ -28,7 +28,7 @@ class ThrowableObject extends MovableObject {
         }
       }, 1000 / 25);
   
-      setInterval(() => {
+      trackInterval(() => {
         this.playAnimation(this.IMAGES);
       }, 120);
     }
