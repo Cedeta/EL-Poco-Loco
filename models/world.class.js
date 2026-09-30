@@ -48,7 +48,6 @@ class World {
 
   /**
    * Startet die Hintergrundmusik als Schleife unter den Spielsounds.
-   * @returns {void}
    */
   prepareBackgroundMusic() {
     this.backgroundMusic.loop = true;
@@ -58,101 +57,152 @@ class World {
 
   /**
    * Setzt die Hintergrundmusik fort, außer im Boss, in Pause oder nach Spielende.
-   * @returns {void}
    */
   resumeBackgroundMusic() {
     if (this.paused || this.gameOver || this.bossActivated) return;
     playSound(this.backgroundMusic, false);
   }
 
+  /**
+   * Verbindet Pepe und die Gegner mit dieser Welt.
+   */
   setWorld() {
     this.character.world = this;
-    this.level.enemies.forEach(e => e.world = this);
+    this.level.enemies.forEach((enemy) => {
+      enemy.world = this;
+    });
   }
 
-  // prüft ob der character mit enemies kollidiert
+  /**
+   * Prüft Treffer, Einsammeln und Aufräumen in einem festen Takt.
+   */
   checkCollisions() {
-    trackInterval(() => {
-      if (this.gameOver || this.paused) return;
+    trackInterval(() => this.runCollisions(), 1000 / 60);
+  }
 
-      // Zuerst die ganze Stomp-Gruppe töten, danach erst abprallen.
-      this.resolveBossHit();
-      this.resolveChickenHits();
+  /**
+   * Zuerst der Stomp, danach Münzen, Flaschen und tote Gegner.
+   */
+  runCollisions() {
+    if (this.gameOver || this.paused) return;
+    this.resolveBossHit();
+    this.resolveChickenHits();
+    this.collectCoins();
+    this.collectBottles();
+    this.resolveThrownBottles();
+    this.removeDeadEnemies();
+  }
 
-      // Character vs Coins (einsammeln)
-      const coinsBefore = this.level.coins.length;
-      this.level.coins = this.level.coins.filter(
-        (coin) => !this.character.isColliding(coin)
-      );
-      this.collectedCoins += coinsBefore - this.level.coins.length;
+  /**
+   * Nimmt Münzen auf, die Pepe berührt.
+   */
+  collectCoins() {
+    const coinsBefore = this.level.coins.length;
+    this.level.coins = this.level.coins.filter((coin) => {
+      return !this.character.isColliding(coin);
+    });
+    this.collectedCoins += coinsBefore - this.level.coins.length;
+  }
 
-      // Character vs Boden-Bottles (einsammeln) – nur bis maxBottles
-      this.level.bottles = this.level.bottles.filter((bottle) => {
-        if (!this.character.isColliding(bottle)) return true;
-        if (this.collectedBottles >= this.maxBottles) return true; // Leiste voll → Bottle bleibt liegen
-        this.collectedBottles++;
-        return false; // eingesammelt → aus dem Level entfernen
-      });
+  /**
+   * Sammelt Bodenflaschen, solange die Leiste nicht voll ist.
+   */
+  collectBottles() {
+    this.level.bottles = this.level.bottles.filter((bottle) => {
+      return this.keepGroundBottle(bottle);
+    });
+  }
 
-      // Wurf-Flaschen vs Enemies (Flasche nach Treffer entfernen)
-      const bottlesToRemove = new Set();
-      this.throwableObjects.forEach((bottle, bottleIndex) => {
-        this.level.enemies = this.level.enemies.filter((enemy) => {
-          if (bottle.isColliding(enemy)) {
-            // Flasche soll nur einmal treffen und dabei zerbrechen
-            if (!bottlesToRemove.has(bottleIndex)) this.shatterBottle(bottle);
-            bottlesToRemove.add(bottleIndex);
+  /**
+   * Lässt eine Bodenflasche liegen, wenn Pepe sie nicht nimmt.
+   */
+  keepGroundBottle(bottle) {
+    if (!this.character.isColliding(bottle)) return true;
+    if (this.collectedBottles >= this.maxBottles) return true;
+    this.collectedBottles++;
+    return false;
+  }
 
-            if (enemy instanceof Chicken) {
-              if (!enemy.isDead && typeof enemy.die === "function") enemy.die();
-              return true;
-            }
+  /**
+   * Trifft geworfene Flaschen und entfernt sie danach.
+   */
+  resolveThrownBottles() {
+    const bottlesToRemove = new Set();
+    this.throwableObjects.forEach((bottle, bottleIndex) => {
+      this.hitEnemiesWithBottle(bottle, bottleIndex, bottlesToRemove);
+    });
+    this.dropHitBottles(bottlesToRemove);
+  }
 
-            if (enemy instanceof SmallChicken) {
-              if (!enemy.isDead && typeof enemy.die === "function") enemy.die();
-              return true;
-            }
+  /**
+   * Prüft eine Flasche gegen alle Gegner. Gegner bleiben im Level.
+   */
+  hitEnemiesWithBottle(bottle, bottleIndex, bottlesToRemove) {
+    this.level.enemies = this.level.enemies.filter((enemy) => {
+      return this.bottleHitsEnemy(bottle, enemy, bottleIndex, bottlesToRemove);
+    });
+  }
 
-            if (enemy instanceof Endboss) {
-              if (typeof enemy.hitByBottle === "function") enemy.hitByBottle();
-              return true;
-            }
-          }
+  /**
+   * Zerbricht die Flasche einmal und wendet den Treffer an.
+   */
+  bottleHitsEnemy(bottle, enemy, bottleIndex, bottlesToRemove) {
+    if (!bottle.isColliding(enemy)) return true;
+    if (!bottlesToRemove.has(bottleIndex)) this.shatterBottle(bottle);
+    bottlesToRemove.add(bottleIndex);
+    this.applyBottleHit(enemy);
+    return true;
+  }
 
-          return true;
-        });
-      });
+  /**
+   * Tötet Hühner oder trifft den Boss, je nach Gegnertyp.
+   */
+  applyBottleHit(enemy) {
+    const chicken = enemy instanceof Chicken || enemy instanceof SmallChicken;
+    if (chicken && !enemy.isDead && typeof enemy.die === "function") enemy.die();
+    if (enemy instanceof Endboss && typeof enemy.hitByBottle === "function") {
+      enemy.hitByBottle();
+    }
+  }
 
-      // getroffene Flaschen entfernen
-      this.throwableObjects = this.throwableObjects.filter(
-        (_, i) => !bottlesToRemove.has(i)
-      );
+  /**
+   * Entfernt Flaschen, die in diesem Takt getroffen haben.
+   */
+  dropHitBottles(bottlesToRemove) {
+    this.throwableObjects = this.throwableObjects.filter((_, index) => {
+      return !bottlesToRemove.has(index);
+    });
+  }
 
-      // tote Chickens und Boss nach 500ms entfernen
-      this.level.enemies = this.level.enemies.filter((enemy) => {
-        if (enemy instanceof Chicken && enemy.isDead) {
-          const aliveTime = new Date().getTime() - (enemy.deathTime || 0);
-          return aliveTime < 500;
-        }
+  /**
+   * Entfernt tote Hühner nach 500 ms und den Boss nach 1500 ms.
+   */
+  removeDeadEnemies() {
+    this.level.enemies = this.level.enemies.filter((enemy) => {
+      return this.keepEnemy(enemy);
+    });
+  }
 
-        if (enemy instanceof SmallChicken && enemy.isDead) {
-          const aliveTime = new Date().getTime() - (enemy.deathTime || 0);
-          return aliveTime < 500;
-        }
+  /**
+   * Behält lebende Gegner und tote nur für die kurze Liegezeit.
+   */
+  keepEnemy(enemy) {
+    if (enemy instanceof Chicken && enemy.isDead) return this.diedWithin(enemy, 500);
+    if (enemy instanceof SmallChicken && enemy.isDead) return this.diedWithin(enemy, 500);
+    if (enemy instanceof Endboss && enemy.dead) return this.diedWithin(enemy, 1500);
+    return true;
+  }
 
-        if (enemy instanceof Endboss && enemy.dead) {
-          const aliveTime = new Date().getTime() - (enemy.deathTime || 0);
-          return aliveTime < 1500;
-        }
-
-        return true;
-      });
-    }, 1000 / 60);
+  /**
+   * Prüft, ob der Tod noch innerhalb der Liegezeit liegt.
+   */
+  diedWithin(enemy, limit) {
+    const aliveTime = new Date().getTime() - (enemy.deathTime || 0);
+    return aliveTime < limit;
   }
 
   /**
    * Trifft der Boss Pepe, bekommt Pepe Schaden.
-   * @returns {void}
    */
   resolveBossHit() {
     const boss = this.level.enemies.find((enemy) => enemy instanceof Endboss);
@@ -162,7 +212,6 @@ class World {
 
   /**
    * Tötet beim Draufspringen alle betroffenen Hühner, sonst normaler Schaden.
-   * @returns {void}
    */
   resolveChickenHits() {
     const colliding = this.livingChickens().filter((enemy) => {
@@ -175,7 +224,6 @@ class World {
 
   /**
    * Prüft, ob Pepe von oben auf ein Huhn fällt.
-   * @returns {boolean} True, solange Pepe in der Luft nach unten fällt.
    */
   isStomping() {
     return this.character.speedY < 0 && this.character.isAboveGround();
@@ -183,7 +231,6 @@ class World {
 
   /**
    * Liefert lebende normale und kleine Hühner.
-   * @returns {MovableObject[]} Lebende Hühner.
    */
   livingChickens() {
     return this.level.enemies.filter((enemy) => this.isLivingChicken(enemy));
@@ -191,8 +238,6 @@ class World {
 
   /**
    * Prüft, ob ein Gegner ein lebendes Huhn ist.
-   * @param {MovableObject} enemy - Gegner aus dem Level.
-   * @returns {boolean} True bei lebendem Huhn oder Küken.
    */
   isLivingChicken(enemy) {
     const chicken = enemy instanceof Chicken || enemy instanceof SmallChicken;
@@ -201,8 +246,6 @@ class World {
 
   /**
    * Tötet das getroffene Huhn und jedes direkt überlappende Nachbarhuhn.
-   * @param {MovableObject[]} colliding - Hühner, die Pepe gerade berührt.
-   * @returns {void}
    */
   defeatStompGroup(colliding) {
     this.stompGroup(colliding).forEach((enemy) => enemy.die());
@@ -211,8 +254,6 @@ class World {
 
   /**
    * Erweitert die getroffenen Hühner um überlappende Nachbarn.
-   * @param {MovableObject[]} colliding - Hühner unter Pepe.
-   * @returns {MovableObject[]} Alle Hühner dieser Stomp-Gruppe.
    */
   stompGroup(colliding) {
     const group = [...colliding];
@@ -222,9 +263,6 @@ class World {
 
   /**
    * Nimmt ein Huhn in die Gruppe auf, wenn es einen Treffer überlappt.
-   * @param {MovableObject[]} group - Bisher getroffene Hühner.
-   * @param {MovableObject} enemy - Weiteres lebendes Huhn.
-   * @returns {void}
    */
   addOverlap(group, enemy) {
     if (group.includes(enemy)) return;
@@ -233,9 +271,6 @@ class World {
 
   /**
    * Prüft, ob zwei Hühner sich berühren oder dicht nebeneinander stehen.
-   * @param {MovableObject} first - Erstes Huhn.
-   * @param {MovableObject} second - Zweites Huhn.
-   * @returns {boolean} True bei Überlappung oder kleinem Abstand.
    */
   chickensOverlap(first, second) {
     const left = Math.max(first.x, second.x);
@@ -246,8 +281,6 @@ class World {
 
   /**
    * Spielt den Glas-Sound einmal, wenn die Flasche zerbricht.
-   * @param {ThrowableObject} bottle - Flasche, die Gegner oder Boden trifft.
-   * @returns {void}
    */
   shatterBottle(bottle) {
     if (bottle.broken) return;
@@ -255,32 +288,50 @@ class World {
     playSound(this.breakSound);
   }
 
+  /**
+   * Prüft Landung und neuen Wurf im festen Takt.
+   */
   checkThrowObjects() {
-    trackInterval(() => {
-      if (this.gameOver || this.paused) return;
-      this.throwableObjects = this.throwableObjects.filter((bottle) => {
-        if (bottle.isAboveGround()) return true;
-        this.shatterBottle(bottle);
-        return false;
-      });
+    trackInterval(() => this.runThrows(), 200);
+  }
 
-      // Flasche werfen
-      if (this.keyboard.SPACE && this.collectedBottles > 0) {
-        let bottle = new ThrowableObject(
-          this.character.x + 50,
-          this.character.y + 100,
-          this.character.otherDirection
-        );
-        this.throwableObjects.push(bottle);
-        this.collectedBottles--;
-        this.keyboard.SPACE = false;
-      }
-    }, 200);
+  /**
+   * Entfernt gelandete Flaschen und wirft bei Leertaste eine neue.
+   */
+  runThrows() {
+    if (this.gameOver || this.paused) return;
+    this.removeLandedBottles();
+    this.throwBottle();
+  }
+
+  /**
+   * Zerbricht Flaschen, die den Boden berühren.
+   */
+  removeLandedBottles() {
+    this.throwableObjects = this.throwableObjects.filter((bottle) => {
+      if (bottle.isAboveGround()) return true;
+      this.shatterBottle(bottle);
+      return false;
+    });
+  }
+
+  /**
+   * Wirft eine Flasche, solange welche gesammelt sind.
+   */
+  throwBottle() {
+    if (!this.keyboard.SPACE || this.collectedBottles <= 0) return;
+    const bottle = new ThrowableObject(
+      this.character.x + 50,
+      this.character.y + 100,
+      this.character.otherDirection
+    );
+    this.throwableObjects.push(bottle);
+    this.collectedBottles--;
+    this.keyboard.SPACE = false;
   }
 
   /**
    * Aktiviert den Endboss und startet den vorhandenen Boss-Sound.
-   * @returns {void}
    */
   activateBoss() {
     this.level.enemies.forEach((enemy) => {
@@ -292,7 +343,6 @@ class World {
 
   /**
    * Pausiert die Welt und hält den Boss-Sound an, ohne ihn zurückzuspulen.
-   * @returns {void}
    */
   togglePause() {
     this.paused = !this.paused;
@@ -309,100 +359,150 @@ class World {
 
   /**
    * Setzt den Boss-Sound fort, solange der Kampf läuft und Sound an ist.
-   * @returns {void}
    */
   resumeBossMusic() {
     if (!this.bossActivated || this.paused || this.gameOver) return;
     playSound(this.bossMusic, false);
   }
 
+  /**
+   * Zeichnet Hintergrund, Leisten und Figuren und plant den nächsten Frame.
+   */
   draw() {
-    // canvas leeren damit alles neu gezeichnet werden kann
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.drawScenery();
+    this.drawHud();
+    this.drawActors();
+    this.tryActivateBoss();
+    this.scheduleNextFrame();
+  }
 
-    // kamera verschieben damit der hintergrund mitläuft
+  /**
+   * Zeichnet Hintergrund und Wolken mit der Kamera.
+   */
+  drawScenery() {
     this.ctx.translate(this.camera_x, 0);
-
     this.addObjectsToMap(this.level.backgroundObjects);
     this.addObjectsToMap(this.level.clouds);
-
-    // kamera wieder zurücksetzen
     this.ctx.translate(-this.camera_x, 0);
+  }
 
-    // statusbar zeichnen (muss zwischen den translate aufrufen sein sonst bewegt sie sich mit)
-    if (this.statusBar) {
-      this.statusBar.setPercentage(this.character.energy);
-      this.addToMap(this.statusBar);
-    }
-    if (this.statusBarCoin) {
-      this.statusBarCoin.setPercentage((this.collectedCoins / this.maxCoins) * 100);
-      this.addToMap(this.statusBarCoin);
-    }
-    if (this.statusBarBottle) {
-      this.statusBarBottle.setPercentage((this.collectedBottles / this.maxBottles) * 100);
-      this.addToMap(this.statusBarBottle);
-    }
-    let boss = this.level.enemies.find((e) => e instanceof Endboss);
+  /**
+   * Zeichnet die Leisten fest am Bildschirm, nicht mit der Kamera.
+   */
+  drawHud() {
+    this.drawStatus(this.statusBar, this.character.energy);
+    this.drawStatus(this.statusBarCoin, this.coinPercent());
+    this.drawStatus(this.statusBarBottle, this.bottlePercent());
+    this.drawBossHud();
+  }
 
-    // Boss tot → Boss-Sound stoppen, danach Win-Sound genau einmal
-    if (this.bossActivated && boss && boss.dead && !this.winSoundPlayed) {
-      this.winSoundPlayed = true;
-      stopSound(this.bossMusic);
-      playSound(this.winSound);
-      if (typeof window.showWin === "function") window.showWin();
-    }
-    if (this.statusBarEndboss && this.bossActivated && boss && !boss.dead) {
-      this.statusBarEndboss.setPercentage(boss.energy);
-      this.addToMap(this.statusBarEndboss);
-    }
+  /**
+   * Liefert den Füllstand der Münzleiste.
+   */
+  coinPercent() {
+    return (this.collectedCoins / this.maxCoins) * 100;
+  }
 
-    // kamera nochmal verschieben für character und enemies
+  /**
+   * Liefert den Füllstand der Flaschenleiste.
+   */
+  bottlePercent() {
+    return (this.collectedBottles / this.maxBottles) * 100;
+  }
+
+  /**
+   * Setzt eine Leiste und zeichnet sie, wenn sie vorhanden ist.
+   */
+  drawStatus(bar, percentage) {
+    if (!bar) return;
+    bar.setPercentage(percentage);
+    this.addToMap(bar);
+  }
+
+  /**
+   * Spielt den Sieg und zeichnet die Boss-Leiste.
+   */
+  drawBossHud() {
+    const boss = this.level.enemies.find((enemy) => enemy instanceof Endboss);
+    this.playWinOnce(boss);
+    this.drawBossBar(boss);
+  }
+
+  /**
+   * Spielt den Sieg-Sound genau einmal, wenn der Boss tot ist.
+   */
+  playWinOnce(boss) {
+    if (!this.bossActivated || !boss || !boss.dead || this.winSoundPlayed) return;
+    this.winSoundPlayed = true;
+    stopSound(this.bossMusic);
+    playSound(this.winSound);
+    if (typeof window.showWin === "function") window.showWin();
+  }
+
+  /**
+   * Zeichnet die Boss-Leiste nur während des Kampfes.
+   */
+  drawBossBar(boss) {
+    if (!this.statusBarEndboss || !this.bossActivated || !boss || boss.dead) return;
+    this.statusBarEndboss.setPercentage(boss.energy);
+    this.addToMap(this.statusBarEndboss);
+  }
+
+  /**
+   * Zeichnet Bodenflaschen hinter Pepe und geworfene Flaschen davor.
+   */
+  drawActors() {
     this.ctx.translate(this.camera_x, 0);
-
-    // flaschen am boden hinter pepe, geworfene flaschen bleiben davor
     this.addObjectsToMap(this.level.bottles);
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.coins);
     this.addObjectsToMap(this.level.enemies);
     this.addObjectsToMap(this.throwableObjects);
-    // kamera wieder zurück
     this.ctx.translate(-this.camera_x, 0);
+  }
 
-    // draw immer wieder aufrufen damit es animiert wird
-    let self = this;
+  /**
+   * Startet den Boss einmal, sobald Pepe den Bereich erreicht.
+   */
+  tryActivateBoss() {
+    if (this.bossActivated || this.character.x < 3300) return;
+    this.bossActivated = true;
+    this.activateBoss();
+  }
 
-    // Boss-Sound startet einmalig, sobald Pepe den Boss-Bereich erreicht.
-    if (!this.bossActivated && this.character.x >= 3300) {
-      this.bossActivated = true;
-      this.activateBoss();
-    }
-    
+  /**
+   * Plant das nächste Bild, außer nach Spielende oder in der Pause.
+   */
+  scheduleNextFrame() {
     if (this.gameOver || this.paused) return;
+    const self = this;
     rememberFrame(requestAnimationFrame(function () {
       self.draw();
     }));
   }
 
+  /**
+   * Zeichnet eine Liste von Objekten.
+   */
   addObjectsToMap(objects) {
-    objects.forEach((o) => {
-      this.addToMap(o);
+    objects.forEach((object) => {
+      this.addToMap(object);
     });
   }
 
-  // fügt ein objekt zur map hinzu und zeichnet es
+  /**
+   * Spiegelt das Bild bei Blick nach rechts und zeichnet es.
+   */
   addToMap(mo) {
-    // wenn das objekt nach links schaut dann spiegel es
-    if (mo.otherDirection) {
-      this.flipImage(mo);
-    }
+    if (mo.otherDirection) this.flipImage(mo);
     mo.draw(this.ctx);
-
-    // spiegelung wieder rückgängig machen
-    if (mo.otherDirection) {
-      this.flipImageBack(mo);
-    }
+    if (mo.otherDirection) this.flipImageBack(mo);
   }
 
+  /**
+   * Spiegelt die Zeichenfläche, damit das Bild nach rechts zeigt.
+   */
   flipImage(mo) {
     this.ctx.save();
     this.ctx.translate(mo.width, 0);
@@ -410,6 +510,9 @@ class World {
     mo.x = mo.x * -1;
   }
 
+  /**
+   * Setzt die Spiegelung nach dem Zeichnen zurück.
+   */
   flipImageBack(mo) {
     mo.x = mo.x * -1;
     this.ctx.restore();

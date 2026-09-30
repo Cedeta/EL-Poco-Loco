@@ -19,6 +19,9 @@ class ThrowableObject extends MovableObject {
       this.throw();
     }
   
+    /**
+     * Bewegt die Flasche seitlich und dreht ihr Bild.
+     */
     throw() {
       trackInterval(() => {
         if (this.otherDirection) {
@@ -33,6 +36,9 @@ class ThrowableObject extends MovableObject {
       }, 120);
     }
   
+    /**
+     * Prüft, ob die Flasche noch über dem Boden ist.
+     */
     isAboveGround() {
       return this.y < 426 - this.height;
     }

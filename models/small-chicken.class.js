@@ -29,19 +29,23 @@ class SmallChicken extends MovableObject {
     );
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_DEAD);
-    this.x = 950 + Math.random() * 2500;
-    this.speed = 0.35 + Math.random() * 0.8;
-    // Viele Hühner laufen gleichzeitig, deshalb etwas leiser als volle Lautstärke.
-    this.walking_sound.volume = 0.2;
-    this.walking_sound.loop = true;
-    this.death_sound.volume = 0.2;
-
+    this.prepareChicken();
     this.animate();
   }
 
   /**
+   * Setzt Startpunkt, Tempo und die leisen Schritt- und Todes-Sounds.
+   */
+  prepareChicken() {
+    this.x = 950 + Math.random() * 2500;
+    this.speed = 0.35 + Math.random() * 0.8;
+    this.walking_sound.volume = 0.2;
+    this.walking_sound.loop = true;
+    this.death_sound.volume = 0.2;
+  }
+
+  /**
    * Beendet das Huhn einmalig und spielt den Todes-Sound.
-   * @returns {void}
    */
   die() {
     if (this.isDead) return;
@@ -56,7 +60,6 @@ class SmallChicken extends MovableObject {
 
   /**
    * Zeigt das letzte Todesbild.
-   * @returns {void}
    */
   showDeadFrame() {
     const frame = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
@@ -65,7 +68,6 @@ class SmallChicken extends MovableObject {
 
   /**
    * Läuft weiter oder stoppt die Schritte bei Pause, Spielende und Tod.
-   * @returns {void}
    */
   updateWalk() {
     if (this.isMovementBlocked() || this.isDead) {
@@ -78,7 +80,6 @@ class SmallChicken extends MovableObject {
 
   /**
    * Prüft, ob Pause oder Spielende Bewegung und Schritte unterbinden.
-   * @returns {boolean} True, wenn das Huhn still sein soll.
    */
   isMovementBlocked() {
     return Boolean(this.world && (this.world.paused || this.world.gameOver));
@@ -86,7 +87,6 @@ class SmallChicken extends MovableObject {
 
   /**
    * Spielt leise Schritte in einer Schleife, ohne sie jeden Frame neu zu starten.
-   * @returns {void}
    */
   playWalkingSound() {
     const audio = this.walking_sound;
@@ -96,7 +96,9 @@ class SmallChicken extends MovableObject {
     playSound(audio, false);
   }
 
-  // Animation Chicken
+  /**
+   * Lässt das Küken laufen und die Laufbilder wechseln.
+   */
   animate() {
     trackInterval(() => this.updateWalk(), 1000 / 60);
     

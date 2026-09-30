@@ -9,9 +9,6 @@ window.soundEnabled = true;
 
 /**
  * Merkt sich ein Intervall, damit es beim Spielende gestoppt werden kann.
- * @param {Function} callback - Ablauf, der wiederholt wird.
- * @param {number} delay - Abstand in Millisekunden.
- * @returns {number} ID des Intervalls.
  */
 function trackInterval(callback, delay) {
   const id = setInterval(callback, delay);
@@ -21,8 +18,6 @@ function trackInterval(callback, delay) {
 
 /**
  * Merkt sich den nächsten Zeichen-Frame.
- * @param {number} id - ID von requestAnimationFrame.
- * @returns {void}
  */
 function rememberFrame(id) {
   animationFrameId = id;
@@ -30,7 +25,6 @@ function rememberFrame(id) {
 
 /**
  * Stoppt Bewegungsintervalle und den Zeichen-Loop nach Win oder Lose.
- * @returns {void}
  */
 function stopAllLoops() {
   activeIntervals.forEach((id) => clearInterval(id));
@@ -41,7 +35,6 @@ function stopAllLoops() {
 
 /**
  * Beendet die Welt: keine Bewegung, keine Kollision, keine Gameplay-Sounds.
- * @returns {void}
  */
 function endWorld() {
   if (!world) return;
@@ -54,7 +47,6 @@ function endWorld() {
 
 /**
  * Lädt Canvas und den zuletzt gespeicherten Sound-Status.
- * @returns {void}
  */
 function init() {
   canvas = document.getElementById("canvas");
@@ -64,7 +56,6 @@ function init() {
 
 /**
  * Stellt den Mute-Status aus localStorage wieder her.
- * @returns {void}
  */
 function loadSoundSetting() {
   const stored = localStorage.getItem(SOUND_STORAGE_KEY);
@@ -75,7 +66,6 @@ function loadSoundSetting() {
 
 /**
  * Merkt sich den Mute-Status für den nächsten Seitenaufruf.
- * @returns {void}
  */
 function saveSoundSetting() {
   localStorage.setItem(SOUND_STORAGE_KEY, String(window.soundEnabled));
@@ -83,7 +73,6 @@ function saveSoundSetting() {
 
 /**
  * Zeigt am vorhandenen Button, ob der Sound an oder aus ist.
- * @returns {void}
  */
 function applySoundIcon() {
   const icon = document.getElementById("sound-toggle");
@@ -93,7 +82,6 @@ function applySoundIcon() {
 
 /**
  * Liefert das Icon passend zum aktuellen Sound-Status.
- * @returns {string} Pfad zur Icon-Datei.
  */
 function soundIconPath() {
   if (window.soundEnabled) return "./assets/img/icons/volume.png";
@@ -102,9 +90,6 @@ function soundIconPath() {
 
 /**
  * Startet einen Clip nur, solange der Sound nicht stumm ist.
- * @param {HTMLAudioElement|null|undefined} audio - Clip, der starten soll.
- * @param {boolean} [rewind=true] - Bei false läuft ein schon spielender Clip weiter.
- * @returns {void}
  */
 function playSound(audio, rewind = true) {
   if (!audio || window.soundEnabled === false) return;
@@ -114,8 +99,6 @@ function playSound(audio, rewind = true) {
 
 /**
  * Stoppt einen Clip und setzt ihn zurück, damit er nicht weiterläuft.
- * @param {HTMLAudioElement|null|undefined} audio - Clip, der stoppen soll.
- * @returns {void}
  */
 function stopSound(audio) {
   if (!audio) return;
@@ -125,7 +108,6 @@ function stopSound(audio) {
 
 /**
  * Stoppt laufende Spielsounds, damit Mute sofort wirkt.
- * @returns {void}
  */
 function stopActiveSounds() {
   if (!world) return;
@@ -140,7 +122,6 @@ function stopActiveSounds() {
 
 /**
  * Stoppt laufende Gegner-Clips, damit Mute sofort wirkt.
- * @returns {void}
  */
 function stopEnemyEnterSounds() {
   const enemies = world?.level?.enemies || [];
@@ -149,8 +130,6 @@ function stopEnemyEnterSounds() {
 
 /**
  * Stoppt Boss-Eintritt sowie Hühner-Schritte und Todes-Sound.
- * @param {object} enemy - Gegner mit optionalen Audio-Clips.
- * @returns {void}
  */
 function stopEnemyClips(enemy) {
   stopSound(enemy.enter_sound);
@@ -160,7 +139,6 @@ function stopEnemyClips(enemy) {
 
 /**
  * Entsperrt die Audio-Ausgabe ohne hörbaren Schnarchton.
- * @returns {void}
  */
 function unlockAudioOutput() {
   const audio = world?.character?.idle_sound;
@@ -174,39 +152,47 @@ function unlockAudioOutput() {
 
 /**
  * Setzt den entsperrten Clip zurück und stellt die Lautstärke her.
- * @param {HTMLAudioElement} audio - Kurz entsperrter Clip.
- * @param {number} previousVolume - Lautstärke vor dem Entsperren.
- * @returns {void}
  */
 function releaseUnlock(audio, previousVolume) {
   stopSound(audio);
   audio.volume = previousVolume;
 }
 
+/**
+ * Startet eine neue Welt und blendet den Startbildschirm aus.
+ */
 function startGame() {
   const overlay = document.getElementById("start-overlay");
-  if (world) return; 
-
+  if (world) return;
   document.body.classList.add("game-started");
+  requestTouchFullscreen();
+  world = new World(canvas, keyboard);
+  hideStartOverlay(overlay);
+  unlockAudioOutput();
+}
 
+/**
+ * Öffnet auf Touch-Geräten den Vollbildmodus des Spielfelds.
+ */
+function requestTouchFullscreen() {
   const container = document.getElementById("game-container");
   const isTouch = window.matchMedia?.("(pointer: coarse)")?.matches;
   if (isTouch && container && !document.fullscreenElement) {
     container.requestFullscreen?.().catch(() => {});
   }
+}
 
-  world = new World(canvas, keyboard);
-
+/**
+ * Blendet den Startbildschirm kurz nach dem Start aus.
+ */
+function hideStartOverlay(overlay) {
   setTimeout(() => {
     if (overlay) overlay.style.display = "none";
   }, 50);
-
-  unlockAudioOutput();
 }
 
 /**
  * Stoppt die Musik der laufenden Welt, bevor sie ersetzt oder verlassen wird.
- * @returns {void}
  */
 function stopWorldAudio() {
   if (!world) return;
@@ -214,6 +200,9 @@ function stopWorldAudio() {
   stopSound(world.bossMusic);
 }
 
+/**
+ * Zeigt Game Over und spielt den Niederlagen-Sound einmal.
+ */
 function showGameOver() {
   const overlay = document.getElementById("gameover-overlay");
   if (overlay) overlay.style.display = "flex";
@@ -223,7 +212,6 @@ function showGameOver() {
 
 /**
  * Spielt den Niederlagen-Sound einmal. Der Welt-Stopp schneidet ihn nicht ab.
- * @returns {void}
  */
 function playLoseOnce() {
   if (!world || world.loseSoundPlayed) return;
@@ -231,6 +219,9 @@ function playLoseOnce() {
   playSound(world.loseSound);
 }
 
+/**
+ * Kehrt vom Game Over zum Startbildschirm zurück und stoppt die Welt.
+ */
 function backToMenu() {
   const gameover = document.getElementById("gameover-overlay");
   const start = document.getElementById("start-overlay");
@@ -245,6 +236,9 @@ function backToMenu() {
   world = null;
 }
 
+/**
+ * Startet nach einer Niederlage eine neue Welt.
+ */
 function restartGame() {
   const gameover = document.getElementById("gameover-overlay");
   const start = document.getElementById("start-overlay");
@@ -257,6 +251,9 @@ function restartGame() {
   world = new World(canvas, keyboard);
 }
 
+/**
+ * Zeigt den Sieg-Bildschirm und stoppt die Welt.
+ */
 function showWin() {
   const win = document.getElementById("win-overlay");
   const gameover = document.getElementById("gameover-overlay");
@@ -265,6 +262,9 @@ function showWin() {
   endWorld();
 }
 
+/**
+ * Kehrt vom Sieg zum Startbildschirm zurück.
+ */
 function backToMenuFromWin() {
   const win = document.getElementById("win-overlay");
   const start = document.getElementById("start-overlay");
@@ -276,6 +276,9 @@ function backToMenuFromWin() {
   world = null;
 }
 
+/**
+ * Startet nach einem Sieg eine neue Welt.
+ */
 function restartGameFromWin() {
   const win = document.getElementById("win-overlay");
   const start = document.getElementById("start-overlay");
@@ -289,7 +292,6 @@ function restartGameFromWin() {
 /**
  * Schaltet den bestehenden Sound-Status um und speichert ihn.
  * Beim Stummschalten werden laufende Clips sofort gestoppt.
- * @returns {void}
  */
 function toggleSound() {
   window.soundEnabled = !window.soundEnabled;
@@ -301,13 +303,15 @@ function toggleSound() {
 
 /**
  * Setzt Hintergrund- und Boss-Musik nach dem Einschalten fort.
- * @returns {void}
  */
 function resumeGameMusic() {
   world?.resumeBackgroundMusic();
   world?.resumeBossMusic();
 }
 
+/**
+ * Schaltet den Vollbildmodus des Spielfelds um.
+ */
 function toggleFullscreen() {
   const container = document.getElementById("game-container");
   if (!container) return;
@@ -320,6 +324,9 @@ function toggleFullscreen() {
 }
 window.toggleFullscreen = toggleFullscreen;
 
+/**
+ * Verlässt den Vollbildmodus, wenn ein Touch-Gerät hochkant steht.
+ */
 function exitFullscreenOnPortrait() {
   const isTouch = window.matchMedia?.("(pointer: coarse)")?.matches;
   if (!isTouch) return;
@@ -332,16 +339,25 @@ window.addEventListener("orientationchange", exitFullscreenOnPortrait);
 window.addEventListener("resize", exitFullscreenOnPortrait);
 
 
+/**
+ * Zeigt das Pause-Fenster.
+ */
 function showPauseOverlay() {
   const o = document.getElementById("pause-overlay");
   if (o) o.style.display = "flex";
 }
 
+/**
+ * Blendet das Pause-Fenster aus.
+ */
 function hidePauseOverlay() {
   const o = document.getElementById("pause-overlay");
   if (o) o.style.display = "none";
 }
 
+/**
+ * Pausiert oder setzt das Spiel fort und zeigt das passende Fenster.
+ */
 function togglePauseUI() {
   if (!world) return;
   if (world.gameOver) return;
@@ -356,16 +372,25 @@ function togglePauseUI() {
 
 window.togglePauseUI = togglePauseUI;
 
+/**
+ * Setzt das Spiel fort, wenn es pausiert ist.
+ */
 function resumeGame() {
   if (pausedUI) togglePauseUI();
 }
 window.resumeGame = resumeGame;
 
+/**
+ * Öffnet die Steuerungshilfe.
+ */
 function openHowto() {
   const o = document.getElementById("howto-overlay");
   if (o) o.style.display = "flex";
 }
 
+/**
+ * Schließt die Steuerungshilfe.
+ */
 function closeHowto() {
   const o = document.getElementById("howto-overlay");
   if (o) o.style.display = "none";
@@ -385,64 +410,63 @@ window.showWin = showWin;
 window.backToMenuFromWin = backToMenuFromWin;
 window.restartGameFromWin = restartGameFromWin;
 
+/**
+ * Bindet die mobilen Tasten an die vorhandene Tastatur.
+ */
 function initTouchControls() {
-  const left = document.getElementById("dpad-left");
-  const right = document.getElementById("dpad-right");
-  const throwBtn = document.getElementById("btn-throw");
-  const jumpBtn = document.getElementById("btn-jump");
+  bindHold("dpad-left", "LEFT");
+  bindHold("dpad-right", "RIGHT");
+  bindTap("btn-throw", "SPACE", 250);
+  bindTap("btn-jump", "UP", 150);
+}
 
-  if (left) {
-    left.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      left.setPointerCapture?.(e.pointerId);
-      keyboard.LEFT = true;
-    });
-    left.addEventListener("pointerup", (e) => {
-      e.preventDefault();
-      keyboard.LEFT = false;
-    });
-    left.addEventListener("pointercancel", (e) => {
-      e.preventDefault();
-      keyboard.LEFT = false;
-    });
-    left.addEventListener("pointerleave", (e) => {
-      e.preventDefault();
-      keyboard.LEFT = false;
-    });
-  }
-  if (right) {
-    right.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      right.setPointerCapture?.(e.pointerId);
-      keyboard.RIGHT = true;
-    });
-    right.addEventListener("pointerup", (e) => {
-      e.preventDefault();
-      keyboard.RIGHT = false;
-    });
-    right.addEventListener("pointercancel", (e) => {
-      e.preventDefault();
-      keyboard.RIGHT = false;
-    });
-    right.addEventListener("pointerleave", (e) => {
-      e.preventDefault();
-      keyboard.RIGHT = false;
-    });
-  }
-  if (throwBtn) {
-    throwBtn.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      keyboard.SPACE = true;
-      setTimeout(() => (keyboard.SPACE = false), 250);
-    });
-  }
-  if (jumpBtn) {
-    jumpBtn.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      keyboard.UP = true;
-      setTimeout(() => (keyboard.UP = false), 150);
-    });
-  }
+/**
+ * Hält eine Taste, solange der Finger auf dem Button liegt.
+ */
+function bindHold(id, key) {
+  const button = document.getElementById(id);
+  if (!button) return;
+  button.addEventListener("pointerdown", (event) => pressHold(button, event, key));
+  button.addEventListener("pointerup", (event) => releaseHold(event, key));
+  button.addEventListener("pointercancel", (event) => releaseHold(event, key));
+  button.addEventListener("pointerleave", (event) => releaseHold(event, key));
+}
+
+/**
+ * Setzt die Taste und hält den Finger auf dem Button fest.
+ */
+function pressHold(button, event, key) {
+  event.preventDefault();
+  button.setPointerCapture?.(event.pointerId);
+  keyboard[key] = true;
+}
+
+/**
+ * Lässt die gehaltene Taste wieder los.
+ */
+function releaseHold(event, key) {
+  event.preventDefault();
+  keyboard[key] = false;
+}
+
+/**
+ * Tippt eine Taste für eine kurze, feste Zeit.
+ */
+function bindTap(id, key, duration) {
+  const button = document.getElementById(id);
+  if (!button) return;
+  button.addEventListener("pointerdown", (event) => tapKey(event, key, duration));
+}
+
+/**
+ * Setzt die Taste kurz und lässt sie danach wieder los.
+ */
+function tapKey(event, key, duration) {
+  event.preventDefault();
+  keyboard[key] = true;
+  setTimeout(() => {
+    keyboard[key] = false;
+  }, duration);
 }
 window.addEventListener("load", initTouchControls);
 

@@ -57,6 +57,9 @@ class Endboss extends MovableObject {
     this.animate();
   }
 
+  /**
+   * Weckt den Boss und spielt den Eintritts-Sound einmal.
+   */
   activate(character) {
     this.activated = true;
     this.target = character;
@@ -66,6 +69,9 @@ class Endboss extends MovableObject {
     }
   }
 
+  /**
+   * Zieht dem Boss Leben ab und merkt sich den Todeszeitpunkt.
+   */
   hitByBottle() {
     if (this.dead) return;
 
@@ -79,7 +85,6 @@ class Endboss extends MovableObject {
 
   /**
    * Trennt Lauf und Bildwechsel, damit der Dash nicht am Animations-Takt hängt.
-   * @returns {void}
    */
   animate() {
     trackInterval(() => this.moveBoss(), 50);
@@ -88,7 +93,6 @@ class Endboss extends MovableObject {
 
   /**
    * Bewegt den Boss. Ein Treffer bricht den Dash ab.
-   * @returns {void}
    */
   moveBoss() {
     if (!this.canMove()) return;
@@ -104,7 +108,6 @@ class Endboss extends MovableObject {
 
   /**
    * Prüft, ob der Boss laufen oder angreifen darf.
-   * @returns {boolean} False bei Pause, Spielende oder vor der Aktivierung.
    */
   canMove() {
     const world = this.target?.world;
@@ -114,7 +117,6 @@ class Endboss extends MovableObject {
 
   /**
    * Wechselt das Bild passend zu Lauf, Angriff, Treffer oder Tod.
-   * @returns {void}
    */
   animateBoss() {
     const world = this.target?.world;
@@ -128,7 +130,6 @@ class Endboss extends MovableObject {
 
   /**
    * Läuft auf Pepe zu oder startet die Ansage, wenn er nah genug ist.
-   * @returns {void}
    */
   walkOrStart() {
     if (Math.abs(this.x - this.target.x) < 320) return this.startWindup();
@@ -137,8 +138,6 @@ class Endboss extends MovableObject {
 
   /**
    * Setzt einen Schritt auf Pepe zu. Nach rechts wird das Bild gespiegelt.
-   * @param {number} speed - Pixel pro bisherigem 280-ms-Takt.
-   * @returns {void}
    */
   stepTowardTarget(speed) {
     const toRight = this.target.x > this.x;
@@ -149,7 +148,6 @@ class Endboss extends MovableObject {
 
   /**
    * Bleibt stehen, damit der kommende Satz vorher lesbar ist.
-   * @returns {void}
    */
   startWindup() {
     this.dashMode = "windup";
@@ -159,7 +157,6 @@ class Endboss extends MovableObject {
 
   /**
    * Startet den Satz in die Richtung, in der Pepe am Ende der Ansage steht.
-   * @returns {void}
    */
   stepWindup() {
     if (Date.now() - this.dashStartedAt < this.windupMs()) return;
@@ -172,7 +169,6 @@ class Endboss extends MovableObject {
 
   /**
    * Springt geradeaus, ohne Pepe während des Satzes nachzuziehen.
-   * @returns {void}
    */
   stepDash() {
     const done = Math.min((Date.now() - this.dashStartedAt) / 450, 1);
@@ -185,7 +181,6 @@ class Endboss extends MovableObject {
 
   /**
    * Wartet kurz nach dem Satz, bevor der Boss wieder läuft.
-   * @returns {void}
    */
   stepRecover() {
     if (Date.now() - this.dashStartedAt < 500) return;
@@ -194,7 +189,6 @@ class Endboss extends MovableObject {
 
   /**
    * Liefert das Lauftempo. Ab 40 Energie wird der Boss schneller.
-   * @returns {number} Pixel pro 280-ms-Takt.
    */
   walkSpeed() {
     if (this.isEnraged()) return 40;
@@ -203,7 +197,6 @@ class Endboss extends MovableObject {
 
   /**
    * Liefert die Ansage. In der zweiten Phase ist sie kürzer.
-   * @returns {number} Dauer in Millisekunden.
    */
   windupMs() {
     if (this.isEnraged()) return 250;
@@ -212,7 +205,6 @@ class Endboss extends MovableObject {
 
   /**
    * Prüft die zweite Phase nach drei Treffern.
-   * @returns {boolean} True ab 40 Energie.
    */
   isEnraged() {
     return this.energy <= 40;

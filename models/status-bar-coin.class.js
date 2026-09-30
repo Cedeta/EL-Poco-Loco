@@ -22,6 +22,9 @@ class StatusBarCoin extends DrawableObject {
       this.loadImage(this.IMAGES[0]);
     }
   
+    /**
+     * Wählt das Bild passend zu den gesammelten Münzen.
+     */
     resolveImageIndex() {
         if (this.percentage > 0 && this.percentage < 20) return 1;
         if (this.percentage >= 20 && this.percentage < 40) return 2;
@@ -31,6 +34,9 @@ class StatusBarCoin extends DrawableObject {
         return 0;
       }
   
+    /**
+     * Setzt den Prozentwert und tauscht das Bild.
+     */
     setPercentage(percentage) {
       this.percentage = percentage;
       let path = this.IMAGES[this.resolveImageIndex()];

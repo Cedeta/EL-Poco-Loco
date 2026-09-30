@@ -24,6 +24,9 @@ class Coin extends DrawableObject {
       this.animate();
     }
   
+    /**
+     * Wechselt das Münzbild einmal pro Sekunde.
+     */
     animate() {
       trackInterval(() => {
         const i = this.currentImage % this.IMAGES.length;

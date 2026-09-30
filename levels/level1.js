@@ -1,3 +1,6 @@
+/**
+ * Erzeugt Münzen an zufälligen Stellen im Level.
+ */
 function createCoins(count) {
   const coins = [];
   for (let i = 0; i < count; i++) {
@@ -6,6 +9,10 @@ function createCoins(count) {
   }
   return coins;
 }
+
+/**
+ * Erzeugt Flaschen an zufälligen Stellen im Level.
+ */
 function createBottles(count) {
   const bottles = [];
   for (let i = 0; i < count; i++) {
@@ -15,126 +22,76 @@ function createBottles(count) {
   return bottles;
 }
 
+/**
+ * Baut Level 1 mit denselben Gegnern, Wolken und Hintergründen.
+ */
 function createLevel1() {
   return new Level(
-  [
-    new Chicken(),
-    new Chicken(),
-    new Chicken(),
-    new Chicken(),
-    new Chicken(),
-    new SmallChicken(),
-    new SmallChicken(),
-    new SmallChicken(),
-    new SmallChicken(),
-    new SmallChicken(),
-    new Endboss(),
-  ],
-
-  [new Cloud()],
-
-
-  [
-    new BackgroundObject("./assets/img/5_background/layers/air.png", -719),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/3_third_layer/2.png",
-      -719
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/2_second_layer/2.png",
-      -719
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/1_first_layer/2.png",
-      -719
-    ),
-
-    new BackgroundObject("./assets/img/5_background/layers/air.png", 0),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/3_third_layer/1.png",
-      0
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/2_second_layer/1.png",
-      0
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/1_first_layer/1.png",
-      0
-    ),
-
-    new BackgroundObject("./assets/img/5_background/layers/air.png", 719),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/3_third_layer/2.png",
-      719
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/2_second_layer/2.png",
-      719
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/1_first_layer/2.png",
-      719
-    ),
-
-    new BackgroundObject("./assets/img/5_background/layers/air.png", 719 * 2),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/3_third_layer/1.png",
-      719 * 2
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/2_second_layer/1.png",
-      719 * 2
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/1_first_layer/1.png",
-      719 * 2
-    ),
-
-    new BackgroundObject("./assets/img/5_background/layers/air.png", 719 * 3),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/3_third_layer/2.png",
-      719 * 3
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/2_second_layer/2.png",
-      719 * 3
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/1_first_layer/2.png",
-      719 * 3
-    ),
-
-    new BackgroundObject("./assets/img/5_background/layers/air.png", 719 * 4),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/3_third_layer/1.png",
-      719 * 4
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/2_second_layer/1.png",
-      719 * 4
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/1_first_layer/1.png",
-      719 * 4
-    ),
-
-    new BackgroundObject("./assets/img/5_background/layers/air.png", 719 * 5),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/3_third_layer/2.png",
-      719 * 5
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/2_second_layer/2.png",
-      719 * 5
-    ),
-    new BackgroundObject(
-      "./assets/img/5_background/layers/1_first_layer/2.png",
-      719 * 5
-    ),
-  ],
-  createCoins(15),
-  createBottles(10)
-);
+    createEnemies(),
+    [new Cloud()],
+    createBackgrounds(),
+    createCoins(15),
+    createBottles(10)
+  );
 }
+
+/**
+ * Liefert die fünf Hühner, fünf Küken und den Endboss.
+ */
+function createEnemies() {
+  return createChickens().concat(createSmallChickens(), [new Endboss()]);
+}
+
+/**
+ * Liefert die fünf normalen Hühner.
+ */
+function createChickens() {
+  return [new Chicken(), new Chicken(), new Chicken(), new Chicken(), new Chicken()];
+}
+
+/**
+ * Liefert die fünf kleinen Hühner.
+ */
+function createSmallChickens() {
+  return [
+    new SmallChicken(),
+    new SmallChicken(),
+    new SmallChicken(),
+    new SmallChicken(),
+    new SmallChicken(),
+  ];
+}
+
+/**
+ * Setzt die Hintergründe an dieselben Stellen wie zuvor.
+ */
+function createBackgrounds() {
+  const parts = [];
+  for (let i = 0; i < 7; i++) {
+    const variant = i % 2 === 0 ? 2 : 1;
+    parts.push(...backgroundAt(-719 + 719 * i, variant));
+  }
+  return parts;
+}
+
+/**
+ * Baut eine Hintergrund-Spalte. Gerade Spalten nutzen Bild 2, ungerade Bild 1.
+ */
+function backgroundAt(x, variant) {
+  const layer = String(variant);
+  return [
+    new BackgroundObject("./assets/img/5_background/layers/air.png", x),
+    new BackgroundObject(layerPath("3_third_layer", layer), x),
+    new BackgroundObject(layerPath("2_second_layer", layer), x),
+    new BackgroundObject(layerPath("1_first_layer", layer), x),
+  ];
+}
+
+/**
+ * Baut den Pfad einer Hintergrundebene.
+ */
+function layerPath(folder, layer) {
+  return "./assets/img/5_background/layers/" + folder + "/" + layer + ".png";
+}
+
 window.createLevel1 = createLevel1;

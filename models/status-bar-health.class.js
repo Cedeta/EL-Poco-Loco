@@ -24,29 +24,30 @@ class StatusBarHealth extends DrawableObject {
     this.loadImage(this.IMAGES[5]);
   }
 
+  /**
+   * Wählt das Bild passend zum Lebensstand.
+   */
   resolveImageIndex() {
-    if (this.percentage == 100) {
-      return 5;
-    } else if (this.percentage >= 80) {
-      return 4;
-    } else if (this.percentage >= 60) {
-      return 3;
-    } else if (this.percentage >= 40) {
-      return 2;
-    } else if (this.percentage >= 20) {
-      return 1;
-    } else {
-      return 0;
-    }
+    if (this.percentage == 100) return 5;
+    if (this.percentage >= 80) return 4;
+    if (this.percentage >= 60) return 3;
+    if (this.percentage >= 40) return 2;
+    if (this.percentage >= 20) return 1;
+    return 0;
   }
 
-  // setzt den prozentwert und ändert das bild entsprechend
+  /**
+   * Setzt den Prozentwert und tauscht das Bild.
+   */
   setPercentage(percentage) {
     this.percentage = percentage;
     let path = this.IMAGES[this.resolveImageIndex()];
     this.img = this.imageCache[path];
   }
 
+  /**
+   * Zeichnet die Leiste über die Basisklasse.
+   */
   draw(ctx) {
     super.draw(ctx);
   }

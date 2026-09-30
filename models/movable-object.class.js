@@ -6,7 +6,9 @@ class MovableObject extends DrawableObject {
   energy = 100;
   lastHit = 0;
 
-  // Gravitiy
+  /**
+   * Zieht das Objekt nach unten, solange es in der Luft ist.
+   */
   applyGravity() {
     trackInterval(() => {
       if (this.isAboveGround() || this.speedY > 0) {
@@ -16,12 +18,17 @@ class MovableObject extends DrawableObject {
     }, 1000 / 25);
   }
 
+  /**
+   * Prüft, ob das Objekt über dem Boden von Pepe liegt.
+   */
   isAboveGround() {
     return this.y < 198;
   }
 
 
-  // charakter.isColliding(Enemies); – mit Offset-Hitbox
+  /**
+   * Prüft die Berührung über die versetzte Trefferbox.
+   */
   isColliding(mo) {
     return (
       this.x + this.width - this.offset.right > mo.x + mo.offset.left &&
@@ -31,6 +38,9 @@ class MovableObject extends DrawableObject {
     );
   }
 
+  /**
+   * Zieht 20 Lebenspunkte ab und merkt sich den Trefferzeitpunkt.
+   */
   hit() {
     this.energy -= 20;
     if (this.energy < 0) {
@@ -40,29 +50,46 @@ class MovableObject extends DrawableObject {
     }
   }
 
+  /**
+   * Prüft, ob der letzte Treffer weniger als eine Sekunde her ist.
+   */
   isHurt() {
     let timepassed = new Date().getTime() - this.lastHit; // differenz in millisekunden
     timepassed = timepassed / 1000;
     return timepassed < 1;
   }
 
+  /**
+   * Prüft, ob keine Lebenspunkte mehr übrig sind.
+   */
   isDead() {
     return this.energy == 0;
   }
 
+  /**
+   * Bewegt das Objekt nach rechts.
+   */
   moveRight() {
     this.x += this.speed;
   }
 
-  // Nach Links bewegen ( enemys )
+  /**
+   * Bewegt das Objekt nach links.
+   */
   moveLeft() {
     this.x -= this.speed;
   }
 
+  /**
+   * Gibt dem Objekt einen Sprungimpuls nach oben.
+   */
   jump() {
     this.speedY = 25;
   }
 
+  /**
+   * Zeigt das nächste Bild der Folge und fängt danach wieder vorne an.
+   */
   playAnimation(images) {
     let i = this.currentImage % images.length; // index soll heißen: ergeht durch die json und fängt nach dem ende wieder bei 1 an.
     let path = images[i];

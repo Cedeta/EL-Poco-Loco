@@ -87,116 +87,163 @@ class Character extends MovableObject {
 
   constructor() {
     super().loadImage("./assets/img/2_character_pepe/2_walk/W-21.png");
+    this.loadCharacterImages();
+    this.prepareCharacterSounds();
+    this.applyGravity();
+    this.animate();
+  }
+
+  /**
+   * Lädt die Bildfolgen für Lauf, Sprung, Tod, Treffer und Stand.
+   */
+  loadCharacterImages() {
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_JUMPING);
     this.loadImages(this.IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_STANDING);
     this.loadImages(this.IMAGES_LONG_STANDING);
-    // Schnarchen bleibt leise, damit es Schritte und Sprünge nicht überdeckt.
+  }
+
+  /**
+   * Hält Schnarchen und Schritte leise, damit sie andere Sounds nicht überdecken.
+   */
+  prepareCharacterSounds() {
     this.idle_sound.volume = 0.15;
     this.walking_sound.volume = 0.2;
     this.walking_sound.loop = true;
-    this.applyGravity();
-    this.animate();
   }
 
-  // Animation Charakter (/ laufen)
-  // ( Info ) % heist Modulu
+  /**
+   * Startet Bewegung, Posen und den Stand getrennt, damit jede Schleife kurz bleibt.
+   */
   animate() {
-    trackInterval(() => {
-      if (this.world && this.world.paused) {
-        this.stopSounds();
-        return;
-      }
+    trackInterval(() => this.moveTick(), 1000 / 60);
+    trackInterval(() => this.poseTick(), 200);
+    trackInterval(() => this.idleTick(), 200);
+  }
 
-      if (this.world && this.world.gameOver) {
-        this.stopSounds();
-        return;
-      }
-      // Bewegung nur erlauben, wenn nicht Tod ist
-      if (!this.isDead()) {
-        this.handleMovement();
-      }
-      this.world.camera_x = -this.x + 60;
-    }, 1000 / 60);
-    
+  /**
+   * Bewegt Pepe, solange er lebt, und folgt mit der Kamera.
+   */
+  moveTick() {
+    if (this.world && this.world.paused) return this.stopSounds();
+    if (this.world && this.world.gameOver) return this.stopSounds();
+    if (!this.isDead()) this.handleMovement();
+    this.world.camera_x = -this.x + 60;
+  }
 
-    trackInterval(() => {
-      if (this.world && this.world.paused) {
-        this.stopSounds();
-        return;
-      }
+  /**
+   * Wählt Tod, Treffer, Sprung oder Lauf. Die Sprungbilder bleiben unverändert.
+   */
+  poseTick() {
+    if (this.holdsPose()) return;
+    if (this.isDead()) return this.playDeadPose();
+    if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT);
+    if (this.isAboveGround()) return this.playAnimation(this.IMAGES_JUMPING);
+    this.playWalkPose();
+  }
 
-      if (this.world && this.world.gameOver) return;
-      if (this.isDead()) {
-        if (!this.die_sound_played) {
-          playSound(this.die_sound);
-          this.die_sound_played = true;
-        }
-        if (!this.deadAnimationFinished) {
-          // Todes-Animation abspielen mit eigenem Counter
-          if (this.deadAnimationCounter < this.IMAGES_DEAD.length) {
-            let path = this.IMAGES_DEAD[this.deadAnimationCounter];
-            this.img = this.imageCache[path];
-            this.deadAnimationCounter++;
-          } else {
-            // Animation fertig - am letzten Bild bleiben
-            this.deadAnimationFinished = true;
-            this.world.gameOver = true;
-            if (typeof window.showGameOver === "function") window.showGameOver();
-            let lastImage = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
-            this.img = this.imageCache[lastImage];
-          }
-        }
-        // Wenn deadAnimationFinished = true, bleibt das Bild auf dem letzten Frame
-      } else if (this.isHurt()) {
-        this.playAnimation(this.IMAGES_HURT);
-      } else if (this.isAboveGround()) {
-        this.playAnimation(this.IMAGES_JUMPING);
-      } else {
-        if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-          this.playAnimation(this.IMAGES_WALKING);
-        }
-      }
-    }, 200);
+  /**
+   * Stoppt bei Pause die Sounds. Nach Spielende bleibt die letzte Pose stehen.
+   */
+  holdsPose() {
+    if (this.world && this.world.paused) {
+      this.stopSounds();
+      return true;
+    }
+    return Boolean(this.world && this.world.gameOver);
+  }
 
-    // Langsamere Animation für Stand-Animation
-    trackInterval(() => {
-      if (this.world && this.world.paused) {
-        this.stopSounds();
-        return;
-      }
-      
-      if (this.world && this.world.gameOver) return;
-      if (!this.isDead() && !this.isHurt() && !this.isAboveGround()) {
-        if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {
-          this.long_standing += 200;
-          
-          // Nach 3 Sekunden (3000ms) zur long_idle Animation wechseln
-          if (this.long_standing >= 3000) {
-            if (!this.isSnoring && window.soundEnabled !== false) {
-              playSound(this.idle_sound);
-              this.isSnoring = true;
-            }
-            this.playAnimation(this.IMAGES_LONG_STANDING);
-          } else {
-            this.playAnimation(this.IMAGES_STANDING);
-          }
-        } else {
-          this.resetIdle();
-        }
-      } else {
-        this.resetIdle();
-      }
-    }, 200);
-    
+  /**
+   * Spielt den Todessound einmal und danach die Todesbilder bis zum letzten Frame.
+   */
+  playDeadPose() {
+    this.playDieSound();
+    if (this.deadAnimationFinished) return;
+    if (this.deadAnimationCounter < this.IMAGES_DEAD.length) return this.showNextDeadFrame();
+    this.finishDeadPose();
+  }
+
+  /**
+   * Spielt Pepes Todessound nur ein einziges Mal.
+   */
+  playDieSound() {
+    if (this.die_sound_played) return;
+    playSound(this.die_sound);
+    this.die_sound_played = true;
+  }
+
+  /**
+   * Zeigt das nächste Todesbild.
+   */
+  showNextDeadFrame() {
+    const path = this.IMAGES_DEAD[this.deadAnimationCounter];
+    this.img = this.imageCache[path];
+    this.deadAnimationCounter++;
+  }
+
+  /**
+   * Beendet die Todesbilder und öffnet den Game-Over-Bildschirm.
+   */
+  finishDeadPose() {
+    this.deadAnimationFinished = true;
+    this.world.gameOver = true;
+    if (typeof window.showGameOver === "function") window.showGameOver();
+    const lastImage = this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1];
+    this.img = this.imageCache[lastImage];
+  }
+
+  /**
+   * Spielt die Laufbilder nur, solange links oder rechts gedrückt ist.
+   */
+  playWalkPose() {
+    if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+      this.playAnimation(this.IMAGES_WALKING);
+    }
+  }
+
+  /**
+   * Zählt die Standzeit und wechselt nach drei Sekunden zum Schnarchen.
+   */
+  idleTick() {
+    if (this.holdsPose()) return;
+    if (this.canIdle()) this.advanceIdle();
+    else this.resetIdle();
+  }
+
+  /**
+   * Prüft, ob Pepe ruhig am Boden steht.
+   */
+  canIdle() {
+    const grounded = !this.isDead() && !this.isHurt() && !this.isAboveGround();
+    const still = !this.world.keyboard.RIGHT && !this.world.keyboard.LEFT;
+    return grounded && still;
+  }
+
+  /**
+   * Schaltet nach drei Sekunden von der kurzen Stand-Animation zum Schnarchen.
+   */
+  advanceIdle() {
+    this.long_standing += 200;
+    if (this.long_standing >= 3000) this.playLongIdle();
+    else this.playAnimation(this.IMAGES_STANDING);
+  }
+
+  /**
+   * Startet den Schnarchton einmal und spielt die lange Stand-Animation.
+   */
+  playLongIdle() {
+    if (!this.isSnoring && window.soundEnabled !== false) {
+      playSound(this.idle_sound);
+      this.isSnoring = true;
+    }
+    this.playAnimation(this.IMAGES_LONG_STANDING);
   }
 
 
   /**
    * Zieht Leben ab und spielt Treffer- oder Todessound einmalig.
-   * @returns {void}
    */
   hit() {
     if (this.isDead()) return;
@@ -214,7 +261,6 @@ class Character extends MovableObject {
 
   /**
    * Springt und spielt den Sprungton genau einmal ab.
-   * @returns {void}
    */
   jump() {
     this.speedY = 25;
@@ -223,7 +269,6 @@ class Character extends MovableObject {
 
   /**
    * Bewegt Pepe und koppelt den Laufsound an den Boden.
-   * @returns {void}
    */
   handleMovement() {
     const movingRight = this.canMoveRight();
@@ -236,7 +281,6 @@ class Character extends MovableObject {
 
   /**
    * Prüft, ob Pepe nach rechts laufen darf.
-   * @returns {boolean} True, wenn die rechte Taste innerhalb des Levels gedrückt ist.
    */
   canMoveRight() {
     return this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x;
@@ -244,7 +288,6 @@ class Character extends MovableObject {
 
   /**
    * Prüft, ob Pepe nach links laufen darf.
-   * @returns {boolean} True, wenn die linke Taste und noch Weg übrig sind.
    */
   canMoveLeft() {
     return this.world.keyboard.LEFT && this.x > 0;
@@ -252,8 +295,6 @@ class Character extends MovableObject {
 
   /**
    * Läuft in eine Richtung und beendet dabei den Schnarchton.
-   * @param {boolean} toLeft - True läuft nach links, false nach rechts.
-   * @returns {void}
    */
   moveGround(toLeft) {
     if (toLeft) this.moveLeft();
@@ -264,7 +305,6 @@ class Character extends MovableObject {
 
   /**
    * Startet einen Sprung nur vom Boden und ohne zweiten Sprungton.
-   * @returns {void}
    */
   startJump() {
     this.jump();
@@ -274,8 +314,6 @@ class Character extends MovableObject {
   /**
    * Spielt Schritte nur am Boden in einer Schleife.
    * In der Luft würde der Laufsound den Sprung überdecken.
-   * @param {boolean} isMoving - Ob links oder rechts gedrückt ist.
-   * @returns {void}
    */
   updateWalkingSound(isMoving) {
     const inAir = this.isAboveGround() || this.speedY > 0;
@@ -292,7 +330,6 @@ class Character extends MovableObject {
 
   /**
    * Beendet den Schnarchton, sobald Pepe sich wieder bewegt.
-   * @returns {void}
    */
   resetIdle() {
     this.long_standing = 0;
@@ -302,7 +339,6 @@ class Character extends MovableObject {
 
   /**
    * Stoppt Pepes Clips, damit Pause und Mute sie nicht weiterlaufen lassen.
-   * @returns {void}
    */
   stopSounds() {
     stopSound(this.walking_sound);

@@ -22,6 +22,9 @@ class StatusBarBottle extends DrawableObject {
       this.loadImage(this.IMAGES[0]);
     }
   
+    /**
+     * Wählt das Bild passend zu den gesammelten Flaschen.
+     */
     resolveImageIndex() {
       if (this.percentage >= 100) return 5;
       if (this.percentage >= 80) return 4;
@@ -31,6 +34,9 @@ class StatusBarBottle extends DrawableObject {
       return 0;
     }
   
+    /**
+     * Setzt den Prozentwert und tauscht das Bild.
+     */
     setPercentage(percentage) {
       this.percentage = percentage;
       let path = this.IMAGES[this.resolveImageIndex()];

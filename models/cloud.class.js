@@ -10,6 +10,9 @@ class Cloud extends MovableObject {
     this.animate();
   }
 
+  /**
+   * Lässt die Wolke langsam nach links ziehen.
+   */
   animate() {
     trackInterval(() => {
       this.moveLeft();
