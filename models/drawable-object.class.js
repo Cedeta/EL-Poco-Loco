@@ -36,9 +36,6 @@ class DrawableObject {
   loadImages(arr) {
     arr.forEach((path) => {
       let img = new Image();
-      img.onerror = function() {
-        console.error("Failed to load image:", path);
-      };
       img.src = path;
       this.imageCache[path] = img;
     });

@@ -472,8 +472,6 @@ window.addEventListener("keydown", (event) => {
   if ((event.key === "p" || event.key === "P") && !event.repeat) {
     togglePauseUI();
   }
-
-  console.log(event);
 });
 
 
@@ -494,6 +492,4 @@ window.addEventListener("keyup", (event) => {
   if (event.key === "ArrowUp") {
     keyboard.UP = false;
   }
-
-  console.log(event);
 });
