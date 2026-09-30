@@ -21,7 +21,7 @@ class World {
 
   gameOver = false;
   paused = false;
-  bossMusicStarted = false;
+  bossActivated = false;
   bossMusic = new Audio("./audio/final-boss-musik.wav");
 
   winSoundPlayed = false;
@@ -163,18 +163,39 @@ class World {
     }, 200);
   }
 
+  /**
+   * Aktiviert den Endboss und startet den vorhandenen Boss-Sound.
+   * @returns {void}
+   */
+  activateBoss() {
+    this.level.enemies.forEach((enemy) => {
+      if (enemy instanceof Endboss) enemy.activate(this.character);
+    });
+    playSound(this.bossMusic);
+  }
+
+  /**
+   * Pausiert die Welt und hält den Boss-Sound an, ohne ihn zurückzuspulen.
+   * @returns {void}
+   */
   togglePause() {
     this.paused = !this.paused;
     if (this.paused) {
-      if (this.bossMusic) this.bossMusic.pause();
+      this.character?.stopSounds();
+      this.bossMusic.pause();
       return;
     }
-
     this.draw();
+    this.resumeBossMusic();
+  }
 
-    if (this.bossMusicStarted && window.soundEnabled !== false) {
-      this.bossMusic.play().catch(() => {});
-    }
+  /**
+   * Setzt den Boss-Sound fort, solange der Kampf läuft und Sound an ist.
+   * @returns {void}
+   */
+  resumeBossMusic() {
+    if (!this.bossActivated || this.paused || this.gameOver) return;
+    playSound(this.bossMusic, false);
   }
 
   draw() {
@@ -205,20 +226,14 @@ class World {
     }
     let boss = this.level.enemies.find((e) => e instanceof Endboss);
 
-    // Boss tot → Bossmusik stoppen, Win-Sound 1x
-    if (this.bossMusicStarted && boss && boss.dead && !this.winSoundPlayed) {
+    // Boss tot → Boss-Sound stoppen, danach Win-Sound genau einmal
+    if (this.bossActivated && boss && boss.dead && !this.winSoundPlayed) {
       this.winSoundPlayed = true;
-      this.bossMusic.pause();
-      this.bossMusic.currentTime = 0;
-      if (window.soundEnabled !== false) {
-        this.winSound.currentTime = 0;
-        this.winSound.play();
-      }
-      if (typeof window.showWin === "function") {
-        window.showWin();
-      }
+      stopSound(this.bossMusic);
+      playSound(this.winSound);
+      if (typeof window.showWin === "function") window.showWin();
     }
-    if (this.statusBarEndboss && this.bossMusicStarted && boss && !boss.dead) {
+    if (this.statusBarEndboss && this.bossActivated && boss && !boss.dead) {
       this.statusBarEndboss.setPercentage(boss.energy);
       this.addToMap(this.statusBarEndboss);
     }
@@ -237,18 +252,10 @@ class World {
     // draw immer wieder aufrufen damit es animiert wird
     let self = this;
 
-// Bossbereich-Trigger 
-    if (!this.bossMusicStarted && this.character.x >= 3300) {
-      this.bossMusicStarted = true;
-      this.level.enemies.forEach((enemy) => {
-        if (enemy instanceof Endboss) {
-          enemy.activate(this.character);
-        }
-      });
-      if (window.soundEnabled !== false) {
-        this.bossMusic.currentTime = 0;
-        this.bossMusic.play();
-      }
+    // Boss-Sound startet einmalig, sobald Pepe den Boss-Bereich erreicht.
+    if (!this.bossActivated && this.character.x >= 3300) {
+      this.bossActivated = true;
+      this.activateBoss();
     }
     
     if (this.gameOver || this.paused) return;

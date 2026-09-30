@@ -33,6 +33,19 @@
     <!-- <h1>EL POLLO LOCO</h1> -->
     <div id="game-container">
       <canvas id="canvas" width="720" height="480"></canvas>
+      <!-- Außerhalb des Start-Overlays, damit beide Icons unten sichtbar bleiben. -->
+      <img
+          id="sound-toggle"
+          src="./assets/img/icons/volume.png"
+          alt="Sound an/aus"
+          onclick="toggleSound()"
+       />
+      <img
+          id="fullscreen-toggle"
+          src="./assets/img/icons/fullscreen.png"
+          alt="Fullscreen an/aus"
+          onclick="toggleFullscreen()"
+       />
       <div id="start-overlay">
         <img
           id="start-screen-img"
@@ -42,18 +55,6 @@
         <button id="start-button" onclick="startGame()">
           START
         </button>
-        <img
-            id="sound-toggle"
-            src="./assets/img/icons/volume.png"
-            alt="Sound an/aus"
-            onclick="toggleSound()"
-         />
-         <img
-            id="fullscreen-toggle"
-            src="./assets/img/icons/fullscreen.png"
-            alt="Fullscreen an/aus"
-            onclick="toggleFullscreen()"
-         />
 
 <button id="howto-button" onclick="openHowto()">Anleitung</button>
 <div id="howto-overlay" style="display:none;">

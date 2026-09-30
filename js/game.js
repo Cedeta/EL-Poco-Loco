@@ -1,11 +1,125 @@
 let canvas;
 let world;
 let keyboard = new Keyboard();
+let pausedUI = false;
+const SOUND_STORAGE_KEY = "soundEnabled";
 window.soundEnabled = true;
 
-
+/**
+ * Lädt Canvas und den zuletzt gespeicherten Sound-Status.
+ * @returns {void}
+ */
 function init() {
   canvas = document.getElementById("canvas");
+  loadSoundSetting();
+  applySoundIcon();
+}
+
+/**
+ * Stellt den Mute-Status aus localStorage wieder her.
+ * @returns {void}
+ */
+function loadSoundSetting() {
+  const stored = localStorage.getItem(SOUND_STORAGE_KEY);
+  if (stored === "true" || stored === "false") {
+    window.soundEnabled = stored === "true";
+  }
+}
+
+/**
+ * Merkt sich den Mute-Status für den nächsten Seitenaufruf.
+ * @returns {void}
+ */
+function saveSoundSetting() {
+  localStorage.setItem(SOUND_STORAGE_KEY, String(window.soundEnabled));
+}
+
+/**
+ * Zeigt am vorhandenen Button, ob der Sound an oder aus ist.
+ * @returns {void}
+ */
+function applySoundIcon() {
+  const icon = document.getElementById("sound-toggle");
+  if (!icon) return;
+  icon.src = soundIconPath();
+}
+
+/**
+ * Liefert das Icon passend zum aktuellen Sound-Status.
+ * @returns {string} Pfad zur Icon-Datei.
+ */
+function soundIconPath() {
+  if (window.soundEnabled) return "./assets/img/icons/volume.png";
+  return "./assets/img/icons/volume-mute.png";
+}
+
+/**
+ * Startet einen Clip nur, solange der Sound nicht stumm ist.
+ * @param {HTMLAudioElement|null|undefined} audio - Clip, der starten soll.
+ * @param {boolean} [rewind=true] - Bei false läuft ein schon spielender Clip weiter.
+ * @returns {void}
+ */
+function playSound(audio, rewind = true) {
+  if (!audio || window.soundEnabled === false) return;
+  if (rewind) audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
+
+/**
+ * Stoppt einen Clip und setzt ihn zurück, damit er nicht weiterläuft.
+ * @param {HTMLAudioElement|null|undefined} audio - Clip, der stoppen soll.
+ * @returns {void}
+ */
+function stopSound(audio) {
+  if (!audio) return;
+  audio.pause();
+  audio.currentTime = 0;
+}
+
+/**
+ * Stoppt laufende Spielsounds, damit Mute sofort wirkt.
+ * @returns {void}
+ */
+function stopActiveSounds() {
+  if (!world) return;
+  world.character?.stopSounds();
+  stopEnemyEnterSounds();
+  stopSound(world.bossMusic);
+  stopSound(world.winSound);
+}
+
+/**
+ * Stoppt den Boss-Eintrittston, falls er noch läuft.
+ * @returns {void}
+ */
+function stopEnemyEnterSounds() {
+  const enemies = world?.level?.enemies || [];
+  enemies.forEach((enemy) => stopSound(enemy.enter_sound));
+}
+
+/**
+ * Entsperrt die Audio-Ausgabe ohne hörbaren Schnarchton.
+ * @returns {void}
+ */
+function unlockAudioOutput() {
+  const audio = world?.character?.idle_sound;
+  if (!audio || window.soundEnabled === false) return;
+  const previousVolume = audio.volume;
+  audio.volume = 0;
+  audio.play().then(() => releaseUnlock(audio, previousVolume)).catch(() => {
+    audio.volume = previousVolume;
+  });
+}
+
+/**
+ * Setzt den entsperrten Clip zurück und stellt die Lautstärke her.
+ * @param {HTMLAudioElement} audio - Kurz entsperrter Clip.
+ * @param {number} previousVolume - Lautstärke vor dem Entsperren.
+ * @returns {void}
+ */
+function releaseUnlock(audio, previousVolume) {
+  stopSound(audio);
+  audio.volume = previousVolume;
 }
 
 function startGame() {
@@ -26,14 +140,7 @@ function startGame() {
     if (overlay) overlay.style.display = "none";
   }, 50);
 
-  const a = world.character.idle_sound;
-  a.currentTime = 0;
-  a.play()
-    .then(() => {
-      a.pause();
-      a.currentTime = 0;
-    })
-    .catch(() => {});
+  unlockAudioOutput();
 }
 
 function showGameOver() {
@@ -70,31 +177,9 @@ function showWin() {
   if (world) {
     world.gameOver = true;
 
-    if (world.bossMusic) {
-      world.bossMusic.pause();
-      world.bossMusic.currentTime = 0;
-    }
-
-    const c = world.character;
-    if (c) {
-      c.walking_sound.pause();
-      c.walking_sound.currentTime = 0;
-      c.jump_sound.pause();
-      c.jump_sound.currentTime = 0;
-      c.idle_sound.pause();
-      c.idle_sound.currentTime = 0;
-      c.hit_sound.pause();
-      c.hit_sound.currentTime = 0;
-      c.die_sound.pause();
-      c.die_sound.currentTime = 0;
-    }
-
-    world.level.enemies.forEach((enemy) => {
-      if (enemy && enemy.enter_sound) {
-        enemy.enter_sound.pause();
-        enemy.enter_sound.currentTime = 0;
-      }
-    });
+    world.character?.stopSounds();
+    stopEnemyEnterSounds();
+    stopSound(world.bossMusic);
   }
 }
 
@@ -115,14 +200,17 @@ function restartGameFromWin() {
   world = new World(canvas, keyboard);
 }
 
+/**
+ * Schaltet den bestehenden Sound-Status um und speichert ihn.
+ * Beim Stummschalten werden laufende Clips sofort gestoppt.
+ * @returns {void}
+ */
 function toggleSound() {
   window.soundEnabled = !window.soundEnabled;
-  const icon = document.getElementById("sound-toggle");
-  if (icon) {
-    icon.src = window.soundEnabled
-      ? "./assets/img/icons/volume.png"
-      : "./assets/img/icons/volume-mute.png";
-  }
+  saveSoundSetting();
+  applySoundIcon();
+  if (!window.soundEnabled) stopActiveSounds();
+  else world?.resumeBossMusic();
 }
 
 function toggleFullscreen() {
@@ -158,8 +246,6 @@ function hidePauseOverlay() {
   const o = document.getElementById("pause-overlay");
   if (o) o.style.display = "none";
 }
-
-let pausedUI = false;
 
 function togglePauseUI() {
   if (!world) return;

@@ -57,10 +57,7 @@ class Endboss extends MovableObject {
     this.target = character;
     if (!this.enterSoundPlayed) {
       this.enterSoundPlayed = true;
-      if (window.soundEnabled !== false) {
-        this.enter_sound.currentTime = 0;
-        this.enter_sound.play();
-      }
+      playSound(this.enter_sound);
     }
   }
 
@@ -81,8 +78,7 @@ class Endboss extends MovableObject {
       if (this.target && this.target.world && this.target.world.paused) return;
       
       if (this.target && this.target.world && this.target.world.gameOver) {
-        this.enter_sound.pause();
-        this.enter_sound.currentTime = 0;
+        stopSound(this.enter_sound);
         return;
       }
       if (this.dead) {
