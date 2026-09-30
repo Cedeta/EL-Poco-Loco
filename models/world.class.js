@@ -27,6 +27,8 @@ class World {
 
   winSoundPlayed = false;
   winSound = new Audio("./audio/win.wav");
+  loseSoundPlayed = false;
+  loseSound = new Audio("./audio/lose.wav");
   breakSound = new Audio("./audio/broken-glass.wav");
 
   constructor(canvas, keyboard) {
@@ -36,6 +38,7 @@ class World {
     this.level = window.createLevel1();
     this.bossMusic.volume = 0.18;
     this.breakSound.volume = 0.3;
+    this.loseSound.volume = 0.4;
     this.setWorld();
     this.draw();
     this.checkCollisions();

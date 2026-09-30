@@ -134,6 +134,7 @@ function stopActiveSounds() {
   stopSound(world.bossMusic);
   stopSound(world.backgroundMusic);
   stopSound(world.winSound);
+  stopSound(world.loseSound);
   stopSound(world.breakSound);
 }
 
@@ -216,7 +217,18 @@ function stopWorldAudio() {
 function showGameOver() {
   const overlay = document.getElementById("gameover-overlay");
   if (overlay) overlay.style.display = "flex";
+  playLoseOnce();
   endWorld();
+}
+
+/**
+ * Spielt den Niederlagen-Sound einmal. Der Welt-Stopp schneidet ihn nicht ab.
+ * @returns {void}
+ */
+function playLoseOnce() {
+  if (!world || world.loseSoundPlayed) return;
+  world.loseSoundPlayed = true;
+  playSound(world.loseSound);
 }
 
 function backToMenu() {
@@ -227,6 +239,7 @@ function backToMenu() {
   hidePauseOverlay();
   pausedUI = false;
   document.body.classList.remove("game-started");
+  stopSound(world?.loseSound);
   stopWorldAudio();
   stopAllLoops();
   world = null;
@@ -238,6 +251,7 @@ function restartGame() {
   if (gameover) gameover.style.display = "none";
   if (start) start.style.display = "none";
 
+  stopSound(world?.loseSound);
   stopWorldAudio();
   stopAllLoops();
   world = new World(canvas, keyboard);
