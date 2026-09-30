@@ -134,6 +134,7 @@ function stopActiveSounds() {
   stopSound(world.bossMusic);
   stopSound(world.backgroundMusic);
   stopSound(world.winSound);
+  stopSound(world.breakSound);
 }
 
 /**

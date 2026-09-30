@@ -27,6 +27,7 @@ class World {
 
   winSoundPlayed = false;
   winSound = new Audio("./audio/win.wav");
+  breakSound = new Audio("./audio/broken-glass.wav");
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
@@ -34,6 +35,7 @@ class World {
     this.keyboard = keyboard;
     this.level = window.createLevel1();
     this.bossMusic.volume = 0.18;
+    this.breakSound.volume = 0.3;
     this.setWorld();
     this.draw();
     this.checkCollisions();
@@ -94,7 +96,8 @@ class World {
       this.throwableObjects.forEach((bottle, bottleIndex) => {
         this.level.enemies = this.level.enemies.filter((enemy) => {
           if (bottle.isColliding(enemy)) {
-            // Flasche soll nur einmal treffen
+            // Flasche soll nur einmal treffen und dabei zerbrechen
+            if (!bottlesToRemove.has(bottleIndex)) this.shatterBottle(bottle);
             bottlesToRemove.add(bottleIndex);
 
             if (enemy instanceof Chicken) {
@@ -238,12 +241,25 @@ class World {
     return left - right < 24 && closeInHeight;
   }
 
+  /**
+   * Spielt den Glas-Sound einmal, wenn die Flasche zerbricht.
+   * @param {ThrowableObject} bottle - Flasche, die Gegner oder Boden trifft.
+   * @returns {void}
+   */
+  shatterBottle(bottle) {
+    if (bottle.broken) return;
+    bottle.broken = true;
+    playSound(this.breakSound);
+  }
+
   checkThrowObjects() {
     trackInterval(() => {
       if (this.gameOver || this.paused) return;
-      this.throwableObjects = this.throwableObjects.filter(
-        (bottle) => bottle.y < 426 - bottle.height
-      );
+      this.throwableObjects = this.throwableObjects.filter((bottle) => {
+        if (bottle.isAboveGround()) return true;
+        this.shatterBottle(bottle);
+        return false;
+      });
 
       // Flasche werfen
       if (this.keyboard.SPACE && this.collectedBottles > 0) {
@@ -340,9 +356,10 @@ class World {
     // kamera nochmal verschieben für character und enemies
     this.ctx.translate(this.camera_x, 0);
 
+    // flaschen am boden hinter pepe, geworfene flaschen bleiben davor
+    this.addObjectsToMap(this.level.bottles);
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.coins);
-    this.addObjectsToMap(this.level.bottles);
     this.addObjectsToMap(this.level.enemies);
     this.addObjectsToMap(this.throwableObjects);
     // kamera wieder zurück
