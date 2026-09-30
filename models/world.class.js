@@ -70,24 +70,9 @@ class World {
     setInterval(() => {
       if (this.gameOver || this.paused) return;
 
-      // Character vs Enemies (Kopf-Sprung nur bei Hühnern, Endboss immer Schaden)
-      this.level.enemies.forEach((enemy) => {
-        if (!this.character.isColliding(enemy)) return;
-
-        if (enemy instanceof Endboss) {
-          this.character.hit();
-          return;
-        }
-
-        if ((enemy instanceof Chicken || enemy instanceof SmallChicken) && !enemy.isDead) {
-          if (this.isStomping(enemy)) {
-            enemy.die();
-            this.character.speedY = 15;
-          } else {
-            this.character.hit();
-          }
-        }
-      });
+      // Zuerst die ganze Stomp-Gruppe töten, danach erst abprallen.
+      this.resolveBossHit();
+      this.resolveChickenHits();
 
       // Character vs Coins (einsammeln)
       const coinsBefore = this.level.coins.length;
@@ -159,9 +144,98 @@ class World {
     }, 1000 / 60);
   }
 
-  // Von oben fallend: ganze Huhn-Hitbox zählt (kein enger Kopf-Bereich)
-  isStomping(enemy) {
+  /**
+   * Trifft der Boss Pepe, bekommt Pepe Schaden.
+   * @returns {void}
+   */
+  resolveBossHit() {
+    const boss = this.level.enemies.find((enemy) => enemy instanceof Endboss);
+    if (!boss || boss.dead || !this.character.isColliding(boss)) return;
+    this.character.hit();
+  }
+
+  /**
+   * Tötet beim Draufspringen alle betroffenen Hühner, sonst normaler Schaden.
+   * @returns {void}
+   */
+  resolveChickenHits() {
+    const colliding = this.livingChickens().filter((enemy) => {
+      return this.character.isColliding(enemy);
+    });
+    if (!colliding.length) return;
+    if (this.isStomping()) this.defeatStompGroup(colliding);
+    else this.character.hit();
+  }
+
+  /**
+   * Prüft, ob Pepe von oben auf ein Huhn fällt.
+   * @returns {boolean} True, solange Pepe in der Luft nach unten fällt.
+   */
+  isStomping() {
     return this.character.speedY < 0 && this.character.isAboveGround();
+  }
+
+  /**
+   * Liefert lebende normale und kleine Hühner.
+   * @returns {MovableObject[]} Lebende Hühner.
+   */
+  livingChickens() {
+    return this.level.enemies.filter((enemy) => this.isLivingChicken(enemy));
+  }
+
+  /**
+   * Prüft, ob ein Gegner ein lebendes Huhn ist.
+   * @param {MovableObject} enemy - Gegner aus dem Level.
+   * @returns {boolean} True bei lebendem Huhn oder Küken.
+   */
+  isLivingChicken(enemy) {
+    const chicken = enemy instanceof Chicken || enemy instanceof SmallChicken;
+    return chicken && !enemy.isDead;
+  }
+
+  /**
+   * Tötet das getroffene Huhn und jedes direkt überlappende Nachbarhuhn.
+   * @param {MovableObject[]} colliding - Hühner, die Pepe gerade berührt.
+   * @returns {void}
+   */
+  defeatStompGroup(colliding) {
+    this.stompGroup(colliding).forEach((enemy) => enemy.die());
+    this.character.speedY = 15;
+  }
+
+  /**
+   * Erweitert die getroffenen Hühner um überlappende Nachbarn.
+   * @param {MovableObject[]} colliding - Hühner unter Pepe.
+   * @returns {MovableObject[]} Alle Hühner dieser Stomp-Gruppe.
+   */
+  stompGroup(colliding) {
+    const group = [...colliding];
+    this.livingChickens().forEach((enemy) => this.addOverlap(group, enemy));
+    return group;
+  }
+
+  /**
+   * Nimmt ein Huhn in die Gruppe auf, wenn es einen Treffer überlappt.
+   * @param {MovableObject[]} group - Bisher getroffene Hühner.
+   * @param {MovableObject} enemy - Weiteres lebendes Huhn.
+   * @returns {void}
+   */
+  addOverlap(group, enemy) {
+    if (group.includes(enemy)) return;
+    if (group.some((hit) => this.chickensOverlap(hit, enemy))) group.push(enemy);
+  }
+
+  /**
+   * Prüft, ob zwei Hühner sich berühren oder dicht nebeneinander stehen.
+   * @param {MovableObject} first - Erstes Huhn.
+   * @param {MovableObject} second - Zweites Huhn.
+   * @returns {boolean} True bei Überlappung oder kleinem Abstand.
+   */
+  chickensOverlap(first, second) {
+    const left = Math.max(first.x, second.x);
+    const right = Math.min(first.x + first.width, second.x + second.width);
+    const closeInHeight = Math.abs(first.y - second.y) < 40;
+    return left - right < 24 && closeInHeight;
   }
 
   checkThrowObjects() {
